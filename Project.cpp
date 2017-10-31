@@ -6,6 +6,7 @@
 #include <fstream>
 #include <cstring>
 #include <ctime>
+#include <string>
 
 //ABC base class
 class Bank_Account {
@@ -54,6 +55,34 @@ class Manager_Acct {
 		void freeze(long Account_Num);
 		void Current_Rates();
 		void Adjust_Rate();
+}
+
+Bank_Account::deposit() {
+	double amount, balance;
+	string amountStr;
+	cout << "How much would you like to deposit?" << endl;
+	cin >> amountStr;
+	sscanf(amountStr, "%.2lf", amount);
+	//TODO access database, set balance
+	balance += amount;
+	//TODO update balance in database
+}
+
+Bank_Account::withdraw() {
+	double amount, balance;
+	string amountStr;
+	cout << "How much would you like to withdraw?" << endl;
+	cin >> amountStr;
+	sscanf(amountStr, "%.2lf", amount);
+	//TODO access database, set balance
+	if (balance - amount > 0) {
+		balance -= amount;
+		//TODO update balance in database
+		cout << "$" << amount << " withdrawn from account successfully";
+	}
+	else {
+		cout << "Insufficient funds for requested withdrawal.";
+	}
 }
 
 int main(void){
