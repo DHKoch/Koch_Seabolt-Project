@@ -85,6 +85,11 @@ Bank_Account::withdraw() {
 	}
 }
 
+Bank_Account::view_translog() {
+//TODO could have a transactions table. Each transaction would have an accountID, an amount, and a date. We could go through
+//the table and print all amounts/dates with the specified accountID. 
+}
+
 int main(void){
 	/*
 	read account number from input
