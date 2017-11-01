@@ -7,6 +7,10 @@
 #include <cstring>
 #include <ctime>
 #include <string>
+#define manager_acct_num = 123456789
+string manager_password = "Password123";
+
+using namespace std;
 
 //ABC base class
 class Bank_Account {
@@ -57,7 +61,7 @@ class Manager_Acct {
 		void Adjust_Rate();
 }
 
-Bank_Account::deposit() {
+void Bank_Account::deposit() {
 	double amount, balance;
 	string amountStr;
 	cout << "How much would you like to deposit?" << endl;
@@ -68,7 +72,7 @@ Bank_Account::deposit() {
 	//TODO update balance in database
 }
 
-Bank_Account::withdraw() {
+void Bank_Account::withdraw() {
 	double amount, balance;
 	string amountStr;
 	cout << "How much would you like to withdraw?" << endl;
@@ -85,18 +89,98 @@ Bank_Account::withdraw() {
 	}
 }
 
-Bank_Account::view_translog() {
+void Bank_Account::view_translog() {
 //TODO could have a transactions table. Each transaction would have an accountID, an amount, and a date. We could go through
 //the table and print all amounts/dates with the specified accountID. 
 }
 
-int main(void){
-	/*
-	read account number from input
-	check to see if manager account number
-		if yes check 
+int manager_login(int acct_num){
+	string password;
+	if(acct_num == manager_acct_num){
+		cout << "please enter your password..." << endl;
+		cin >> password;
+		if(pass_encrypt(password) == pass_encrypt(manager_password)){
+			return 1;
+		}
+		else{
+			return 0;
+		}
+	}
+	else{
+		return 0;
+	}
+	return 0;
+}
+
+string pass_encrypt(string password){
+	for(auto &c : password){
+		if(islower(c)){
+			c = toupper(c);
+		}
+		else if(isupper(c)){
+			c = tolower(c);
+		}
+	}
+	for(auto &c : password){
+		if(c=='z'){
+			c -= 1;
+		}
+		else if(c < 'z'){
+			c += 1;
+		}
+	}
+	return password;
+}
 	
-	*/
+
+int main(void){
+	int acct_num;
+	char choice;
+	int a = 0;
+	int b = 0;
+	cout << "Welcome to Online Banking Inc." << endl;
+	cout << "------------------------------------------------" << endl << endl;
+	cout << "Who would you like to sign in as:" << endl
+	<< "1.) Manager" << endl
+	<< "2.) Customer" << endl;
+	cin >> choice;
+	while(a == 0){
+		switch(choice){
+			
+			case '1':
+			cout << "Welcome! Please enter your employee number:" << endl;
+			cin >> acct_num;
+			b = manager_login(acct_num);
+			if(b==1){
+				cout << "Welcome Manager!" << endl;
+				cout << "------------------------------------------------" << endl << endl;
+				//switch statement here with the options of freeze, view rate, change rates, and log out
+				a=1;
+			}
+			else{
+				cout << "Login failed...." << endl;
+				cout << "Please try again." <, endl;
+			}
+			break;
+			
+			case '2':
+			cout << "Welcome User! Please enter your Account Number:" <, endl;
+			cin >> acct_num;
+			b = user_login;
+			if(b==1){
+				//create object of the correct type based off data from sql querry
+			}
+			a=1;
+			break;
+			
+			default:
+			cout << "Incorrect choice please try again" << endl << endl;
+			
+			break;
+		}
+		
+	}
+	
 	return 0;
 }
 
