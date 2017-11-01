@@ -57,6 +57,7 @@ class Manager_Acct {
 		//userID?
 	public:
 		void freeze(long Account_Num);
+		void unfreeze(long Account_Num);
 		void Current_Rates();
 		void Adjust_Rate();
 }
@@ -130,6 +131,34 @@ string pass_encrypt(string password){
 		}
 	}
 	return password;
+}
+
+void Manager_Acct::freeze(long Account_Num) {
+	if (true /*TODO if account exists*/) {
+		if (true /*TODO if account isn't already frozen*/) {
+			//TODO set frozen to one in database for account
+		}
+		else {
+			cout << "Account is already frozen." << endl;
+		}
+	}
+	else {
+		cout << "Account not found." << endl;
+	}
+}
+
+void Manager_Acct::unfreeze(long Account_Num) {
+	if (true /*TODO if account exists*/) {
+		if (true /*TODO if account is frozen*/) {
+			//TODO set frozen to zero in database for account
+		}
+		else {
+			cout << "Account is not frozen." << endl;
+		}
+	}
+	else {
+		cout << "Account not found." << endl;
+	}
 }
 	
 
