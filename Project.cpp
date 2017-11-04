@@ -32,6 +32,26 @@ char user_acct(long acct_num){
 	}
 }
 
+string pass_encrypt(string password) {
+	for (auto &c : password) {
+		if (islower(c)) {
+			c = toupper(c);
+		}
+		else if (isupper(c)) {
+			c = tolower(c);
+		}
+	}
+	for (auto &c : password) {
+		if (c == 'z') {
+			c -= 1;
+		}
+		else if (c < 'z') {
+			c += 1;
+		}
+	}
+	return password;
+}
+
 //ABC base class
 class Bank_Account {
 	private:
@@ -48,7 +68,7 @@ class Bank_Account {
 		Bank_Account(long acct_num); //parametric constructor for existing account
 		void deposit();
 		void withdraw();
-		virtual void check_balance();
+		virtual void check_balance() {};
 		void view_translog();
 		void close_Acct();
 		//transfer money function
@@ -59,6 +79,7 @@ Bank_Account::Bank_Account(){
 }
 
 Bank_Account::Bank_Account(long acct_num){
+	//if acct_num = -1, ask for an account number. this way we only need one saving account constructor
 	ifstream myfile;
 	char filename[30];
 	string in;
@@ -115,12 +136,12 @@ class Checking_Acct : public Bank_Account {
 	private:
 		
 	public:
-		Checking_Acct();
-		void check_balance();
+		Checking_Acct(long acct_num = -1);
+		void check_balance() {};
 		//pay bill function??????????
 };
 
-Checking_Acct::Checking_Acct() : Bank_Account(){
+Checking_Acct::Checking_Acct(long acct_num) : Bank_Account(acct_num) {
 	//calls base constructor only so far
 }
 
@@ -130,18 +151,18 @@ class Saving_Acct : public Bank_Account {
 		float Interest_Rate;
 		
 	public:
-		Saving_Acct();
-		//Saving_Acct(long acct_num);
-		void check_balance();
+		Saving_Acct(long acct_num = -1);
+		void check_balance() {};
 		void calc_Predicted_Interest();
 };
 
-Saving_Acct::Saving_Acct() : Bank_Account(){
+//default value of -1 for account number, so we only need one svaing constructor
+Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 	int i =0;
 	float rate;
 	int range;
-	vector<float> rates;
-	vector<int> ranges;
+	vector<float>rates;
+	vector<int>ranges;
 	string filename = "Rates.txt", in;
 	ifstream file;
 	file.open(filename);
@@ -153,86 +174,47 @@ Saving_Acct::Saving_Acct() : Bank_Account(){
 		getline(file, in);
 		sscanf(in.c_str(), "%f", rate);
 		getline(file, in);
-		sscanf(in, "%d", range);
+		sscanf(in.c_str(), "%d", range);
 		rates.push_back(rate);
 		ranges.push_back(range);
 	}
 	file.close();
-	if(balance>range[3]){
+	if (balance>ranges[3]) {
 		Interest_Rate = rates[3];
 	}
-	else if(balance>range[2]){
+	else if (balance>ranges[2]) {
 		Interest_Rate = rates[2];
 	}
-	else if(balance>range[1]){
+	else if (balance>ranges[1]) {
 		Interest_Rate = rates[1];
 	}
-	else if(balance>range[0]){
+	else if (balance>ranges[0]) {
 		Interest_Rate = rates[0];
 	}
-	else{
+	else {
 		Interest_Rate = 0.00;
 	}
 }
-//currently don't need this, Bank_Account already has constructors to handle if account_num was/wasn't entered
-//Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(long acct_num){
-//	int i =0;
-//	float rate;
-//	int range;
-//	vector<float>rates;
-//	vector<int>ranges;
-//	string filename = "Rates.txt", in;
-//	ifstream file;
-//	file.open(filename);
-//	if(!file.is_open()){
-//		//checks to see if file was opened
-//		cout << "error Rates.txt file not opened" << endl;
-//	}
-//	for(i=0;i<4;i++){
-//		getline(file, in);
-//		sscanf(in, "%f", rate);
-//		getline(file, in);
-//		sscanf(in, "%d", range);
-//		rates.push_back(rate);
-//		ranges.push_back(range);
-//	}
-//	file.close();
-//	if (balance>range[3]) {
-//		Interest_Rate = rates[3];
-//	}
-//	else if (balance>range[2]) {
-//		Interest_Rate = rates[2];
-//	}
-//	else if (balance>range[1]) {
-//		Interest_Rate = rates[1];
-//	}
-//	else if (balance>range[0]) {
-//		Interest_Rate = rates[0];
-//	}
-//	else {
-//		Interest_Rate = 0.00;
-//	}
-//}
 
 class Manager_Acct {
 	private:
 		string Password;
 		int empl_num;
 	public:
-		Manager();
-		int manager_login(int acct_num);
+		Manager_Acct();
+		int manager_login(long acct_num);
 		void freeze(long Account_Num);
 		void unfreeze(long Account_Num);
-		void Current_Rates();
-		void Adjust_Rate();
+		void Current_Rates() {};
+		void Adjust_Rate() {};
 };
 
-Manager::Mangaer(){
+Manager_Acct::Manager_Acct(){
 	empl_num = 12345678;
 	Password = pass_encrypt("Password123");
 }
 
-int Manager::manager_login(long acct_num){
+int Manager_Acct::manager_login(long acct_num){
 	string pass;
 	if(acct_num == empl_num){
 		cout << "please enter your password..." << endl;
@@ -277,38 +259,15 @@ void Manager_Acct::unfreeze(long Account_Num) {
 		cout << "Account not found." << endl;
 	}
 }
-	
-string pass_encrypt(string password){
-	for(auto &c : password){
-		if(islower(c)){
-			c = toupper(c);
-		}
-		else if(isupper(c)){
-			c = tolower(c);
-		}
-	}
-	for(auto &c : password){
-		if(c=='z'){
-			c -= 1;
-		}
-		else if(c < 'z'){
-			c += 1;
-		}
-	}
-	return password;
-}
 
 int main(void){
-	char type_choice;
-	Bank_Account* Accout;
-	char type;
-	string acct_str;
-	long acct_num;
-	char choice;
-	int b = 0;
-	int c = 0;
-	string freeze_str;
-	long freeze_num;
+	string in;
+	char type_choice, type, choice;
+	Bank_Account* Account;
+	Manager_Acct M;
+	string acct_str, freeze_str;
+	long acct_num, freeze_num;
+	int a = 0, b = 0, c = 0;
 	
 	cout << "Welcome to Online Banking Inc." << endl;
 	cout << "------------------------------------------------" << endl << endl;
@@ -323,7 +282,6 @@ int main(void){
 		switch(choice){
 			
 			case '1':
-			Manager M();
 			cout << "Welcome! Please enter your employee number:" << endl;
 			getline(cin, acct_str);
 			sscanf(acct_str.c_str(),"%li",acct_num);
@@ -338,7 +296,8 @@ int main(void){
 					cout << "3.) View Current Interest Rates" << endl;
 					cout << "4.) Adjust Interest Rates" << endl;
 					cout << "5.) Log Out" << endl;
-					getline(cin, choice);
+					getline(cin, in);
+					sscanf(in.c_str(), "%c", choice);
 					switch(choice){
 					
 						case '1':
@@ -375,32 +334,31 @@ int main(void){
 			}
 			else{
 				cout << "Login failed...." << endl;
-				cout << "Please try again." <, endl;
+				cout << "Please try again." << endl;
 			}
 			break;
 			
 			case '2':
-			cout << "Welcome User! Please enter your Account Number:" <, endl;
-			getline(sin,acct_str);
-			sscanf(acct_str.c_str(),"%ld",acct_num);
-			type = user_acct(acct_num);
+				cout << "Welcome User! Please enter your Account Number:" << endl;
+				getline(cin,acct_str);
+				sscanf(acct_str.c_str(),"%ld",acct_num);
+				type = user_acct(acct_num);
 			
-			if(type == 'F'){
-				cout << "This account number does not exist." << endl;
-				cout << "If you would like to create this account please select 'Create Account' from the main menu" << endl;
-			}
+				if(type == 'F'){
+					cout << "This account number does not exist." << endl;
+					cout << "If you would like to create this account please select 'Create Account' from the main menu" << endl;
+				}
 			
-			else if(type == 'S'){
-				Account = new Saving_Acct(acct_num);
-			}
+				else if(type == 'S'){
+					Account = new Saving_Acct(acct_num);
+				}
 			
-			else if(type == 'C'){
-				Account = new Checking_Acct(acct_num);
-			}
-			//add menu for user here
+				else if(type == 'C'){
+					Account = new Checking_Acct(acct_num);
+				}
+				//add menu for user here
 			
-			break;
-			
+				break;
 			case '3':
 			cout << "Welcome!" << endl;
 			cout << "------------------------------------------------" << endl << endl;
@@ -408,7 +366,8 @@ int main(void){
 			cout << "What type of Account woudl you like to open? Savings or Checking?" << endl;
 			while(c == 0){
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
-				getline(cin,type_choice);
+				getline(cin,in);
+				sscanf(in.c_str(), "%c", type_choice);
 				switch(type_choice){
 					case 'S':
 					Account = new Saving_Acct();
