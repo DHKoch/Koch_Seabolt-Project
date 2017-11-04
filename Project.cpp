@@ -9,12 +9,15 @@
 #include <cstring>
 #include <ctime>
 #include <string>
+#include <vector>
 
 using namespace std;
 
+//returns type of account
 char user_acct(long acct_num){
 	char temp;
-	std::ifstream myfile;
+	ifstream myfile;
+	string in;
 	char filename[30];
 	int n = sprintf(filename,"%li.txt",acct_num);
 	myfile.open(filename);
@@ -22,7 +25,8 @@ char user_acct(long acct_num){
 		return 'F';
 	}
 	else{
-		myfile >> temp;
+		getline(myfile, in);
+		sscanf(in.c_str(), "%c", temp);
 		myfile.close();
 		return temp;
 	}
@@ -35,13 +39,13 @@ class Bank_Account {
 	protected:
 		int userID;
 		long Account_Num;
-		double Balance;
+		double balance;
 		string Password;
 		char Acct_type;
 		bool frozen;
 	public:
 		Bank_Account(); //constructor for new account
-		Bank_Account(long acct_num); ,//parametric constructor for existing account
+		Bank_Account(long acct_num); //parametric constructor for existing account
 		void deposit();
 		void withdraw();
 		virtual void check_balance();
@@ -55,16 +59,23 @@ Bank_Account::Bank_Account(){
 }
 
 Bank_Account::Bank_Account(long acct_num){
-	std::ifstream myfile;
+	ifstream myfile;
 	char filename[30];
-	int n = sprintf(filename,"%li.txt",acct_num);
+	string in;
+	sprintf(filename,"%li.txt",acct_num);
 	myfile.open(filename);
-	myfile >> Acct_type;
-	myfile >> userID;
-	myfile >> Account_Num;
-	myfile >> Password;
-	myfile >> balance;
-	myfile >> frozen;
+	getline(myfile, in);
+	sscanf(in.c_str(), "%c", Acct_type);
+	getline(myfile, in);
+	sscanf(in.c_str(), "%d", userID);
+	getline(myfile, in);
+	sscanf(in.c_str(), "%ld", Account_Num);
+	getline(myfile, in);
+	sscanf(in.c_str(), "%s", Password);
+	getline(myfile, in);
+	sscanf(in.c_str(), "%lf", balance);
+	getline(myfile, in);
+	sscanf(in.c_str(), "%d", frozen);
 	myfile.close();
 }
 
@@ -127,34 +138,37 @@ class Saving_Acct : public Bank_Account {
 
 Saving_Acct::Saving_Acct() : Bank_Account(){
 	int i =0;
-	float temp2;
-	int temp;
-	vector<float>rates;
-	vector<int>range;
-	string filename = "Rates.txt";
-	myfile.open(filename);
-	if(!myfile.is_open()){
+	float rate;
+	int range;
+	vector<float> rates;
+	vector<int> ranges;
+	string filename = "Rates.txt", in;
+	ofstream file;
+	file.open(filename);
+	if(!file.is_open()){
 		//checks to see if file was opened
 		cout << "error Rates.txt file not opened" << endl;
 	}
 	for(i=0;i<4;i++){
-		myfile >> temp;
-		myfile >> temp2;
-		rates.push_back(temp2);
-		range.push_back(temp);
+		getline(file, in);
+		sscanf(in, "%f", rate);
+		getline(file, in);
+		sscanf(in, "%d", range);
+		rates.push_back(rate);
+		ranges.push_back(range);
 	}
-	myfile.close();
-	if(balance>range[0]){
-		Interest_Rate = rates[0];
-	}
-	else if(balance>range[1]){
-		Interest_Rate = rates[1];
+	file.close();
+	if(balance>range[3]){
+		Interest_Rate = rates[3];
 	}
 	else if(balance>range[2]){
 		Interest_Rate = rates[2];
 	}
-	else if(balance>range[3]){
-		Interest_Rate = rates[3];
+	else if(balance>range[1]){
+		Interest_Rate = rates[1];
+	}
+	else if(balance>range[0]){
+		Interest_Rate = rates[0];
 	}
 	else{
 		Interest_Rate = 0.00;
@@ -392,7 +406,7 @@ int main(void){
 			cout << "What type of Account woudl you like to open? Savings or Checking?" << endl;
 			while(c == 0){
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
-				getlin(cin,type_choice);
+				getline(cin,type_choice);
 				switch(type_choice){
 					case 'S':
 					Account = new Saving_Acct();
