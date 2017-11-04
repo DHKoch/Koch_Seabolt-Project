@@ -131,7 +131,7 @@ class Saving_Acct : public Bank_Account {
 		
 	public:
 		Saving_Acct();
-		Saving_Acct(long acct_num);
+		//Saving_Acct(long acct_num);
 		void check_balance();
 		void calc_Predicted_Interest();
 };
@@ -143,7 +143,7 @@ Saving_Acct::Saving_Acct() : Bank_Account(){
 	vector<float> rates;
 	vector<int> ranges;
 	string filename = "Rates.txt", in;
-	ofstream file;
+	ifstream file;
 	file.open(filename);
 	if(!file.is_open()){
 		//checks to see if file was opened
@@ -151,7 +151,7 @@ Saving_Acct::Saving_Acct() : Bank_Account(){
 	}
 	for(i=0;i<4;i++){
 		getline(file, in);
-		sscanf(in, "%f", rate);
+		sscanf(in.c_str(), "%f", rate);
 		getline(file, in);
 		sscanf(in, "%d", range);
 		rates.push_back(rate);
@@ -174,42 +174,45 @@ Saving_Acct::Saving_Acct() : Bank_Account(){
 		Interest_Rate = 0.00;
 	}
 }
-
-Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(long acct_num){
-	int i =0;
-	float temp2;
-	int temp;
-	vector<float>rates;
-	vector<int>range;
-	string filename = "Rates.txt";
-	myfile.open(filename);
-	if(!myfile.is_open()){
-		//checks to see if file was opened
-		cout << "error Rates.txt file not opened" << endl;
-	}
-	for(i=0;i<4;i++){
-		myfile >> temp;
-		myfile >> temp2;
-		rates.push_back(temp2);
-		range.push_back(temp);
-	}
-	myfile.close();
-	if(balance>range[0]){
-		Interest_Rate = rates[0];
-	}
-	else if(balance>range[1]){
-		Interest_Rate = rates[1];
-	}
-	else if(balance>range[2]){
-		Interest_Rate = rates[2];
-	}
-	else if(balance>range[3]){
-		Interest_Rate = rates[3];
-	}
-	else{
-		Interest_Rate = 0.00;
-	}
-}
+//currently don't need this, Bank_Account already has constructors to handle if account_num was/wasn't entered
+//Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(long acct_num){
+//	int i =0;
+//	float rate;
+//	int range;
+//	vector<float>rates;
+//	vector<int>ranges;
+//	string filename = "Rates.txt", in;
+//	ifstream file;
+//	file.open(filename);
+//	if(!file.is_open()){
+//		//checks to see if file was opened
+//		cout << "error Rates.txt file not opened" << endl;
+//	}
+//	for(i=0;i<4;i++){
+//		getline(file, in);
+//		sscanf(in, "%f", rate);
+//		getline(file, in);
+//		sscanf(in, "%d", range);
+//		rates.push_back(rate);
+//		ranges.push_back(range);
+//	}
+//	file.close();
+//	if (balance>range[3]) {
+//		Interest_Rate = rates[3];
+//	}
+//	else if (balance>range[2]) {
+//		Interest_Rate = rates[2];
+//	}
+//	else if (balance>range[1]) {
+//		Interest_Rate = rates[1];
+//	}
+//	else if (balance>range[0]) {
+//		Interest_Rate = rates[0];
+//	}
+//	else {
+//		Interest_Rate = 0.00;
+//	}
+//}
 
 class Manager_Acct {
 	private:
@@ -310,10 +313,9 @@ int main(void){
 	cout << "Welcome to Online Banking Inc." << endl;
 	cout << "------------------------------------------------" << endl << endl;
 	cout << "Please select an option to begin" << endl
-	<< "1.) Login as Manager" << endl
-	<< "2.) Login as Customer" << endl
-	<< "3.) Create New Customer Account" << endl
-	<< 
+		<< "1.) Login as Manager" << endl
+		<< "2.) Login as Customer" << endl
+		<< "3.) Create New Customer Account" << endl;
 	
 	cin >> choice;
 	cin.ignore();
