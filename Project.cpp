@@ -51,8 +51,7 @@ class Bank_Account {
 };
 
 Bank_Account::Bank_Account(){
-	//prompt user for all info 
-	//save to file?
+	//ask user for info and error check the info
 }
 
 Bank_Account::Bank_Account(long acct_num){
@@ -117,17 +116,85 @@ Checking_Acct::Checking_Acct() : Bank_Account(){
 //derived class
 class Saving_Acct : public Bank_Account {
 	private:
-		//float Interest_Rate;
+		float Interest_Rate;
 		
 	public:
 		Saving_Acct();
+		Saving_Acct(long acct_num);
 		void check_balance();
 		void calc_Predicted_Interest();
 };
 
 Saving_Acct::Saving_Acct() : Bank_Account(){
-	//set interest rate based on balance
-	//need to read from rate file for this
+	int i =0;
+	float temp2;
+	int temp;
+	vector<float>rates;
+	vector<int>range;
+	string filename = "Rates.txt";
+	myfile.open(filename);
+	if(!myfile.is_open()){
+		//checks to see if file was opened
+		cout << "error Rates.txt file not opened" << endl;
+	}
+	for(i=0;i<4;i++){
+		myfile >> temp;
+		myfile >> temp2;
+		rates.push_back(temp2);
+		range.push_back(temp);
+	}
+	myfile.close();
+	if(balance>range[0]){
+		Interest_Rate = rates[0];
+	}
+	else if(balance>range[1]){
+		Interest_Rate = rates[1];
+	}
+	else if(balance>range[2]){
+		Interest_Rate = rates[2];
+	}
+	else if(balance>range[3]){
+		Interest_Rate = rates[3];
+	}
+	else{
+		Interest_Rate = 0.00;
+	}
+}
+
+Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(long acct_num){
+	int i =0;
+	float temp2;
+	int temp;
+	vector<float>rates;
+	vector<int>range;
+	string filename = "Rates.txt";
+	myfile.open(filename);
+	if(!myfile.is_open()){
+		//checks to see if file was opened
+		cout << "error Rates.txt file not opened" << endl;
+	}
+	for(i=0;i<4;i++){
+		myfile >> temp;
+		myfile >> temp2;
+		rates.push_back(temp2);
+		range.push_back(temp);
+	}
+	myfile.close();
+	if(balance>range[0]){
+		Interest_Rate = rates[0];
+	}
+	else if(balance>range[1]){
+		Interest_Rate = rates[1];
+	}
+	else if(balance>range[2]){
+		Interest_Rate = rates[2];
+	}
+	else if(balance>range[3]){
+		Interest_Rate = rates[3];
+	}
+	else{
+		Interest_Rate = 0.00;
+	}
 }
 
 class Manager_Acct {
@@ -215,19 +282,25 @@ string pass_encrypt(string password){
 }
 
 int main(void){
+	char type_choice;
 	Bank_Account* Accout;
 	char type;
 	string acct_str;
 	long acct_num;
 	char choice;
 	int b = 0;
+	int c = 0;
 	string freeze_str;
 	long freeze_num;
+	
 	cout << "Welcome to Online Banking Inc." << endl;
 	cout << "------------------------------------------------" << endl << endl;
-	cout << "Who would you like to sign in as:" << endl
-	<< "1.) Manager" << endl
-	<< "2.) Customer" << endl;
+	cout << "Please select an option to begin" << endl
+	<< "1.) Login as Manager" << endl
+	<< "2.) Login as Customer" << endl
+	<< "3.) Create New Customer Account" << endl
+	<< 
+	
 	cin >> choice;
 	cin.ignore();
 	while(a == 0){
@@ -302,19 +375,47 @@ int main(void){
 			}
 			
 			else if(type == 'S'){
-				Account = new Saving_Acct();
+				Account = new Saving_Acct(acct_num);
 			}
 			
 			else if(type == 'C'){
-				Account = new Checking_Acct();
+				Account = new Checking_Acct(acct_num);
 			}
 			//add menu for user here
 			
 			break;
 			
 			case '3':
-			//create user account
-			//save no new user file
+			cout << "Welcome!" << endl;
+			cout << "------------------------------------------------" << endl << endl;
+			cout << "To create your account we need to gather some information from you" << endl;
+			cout << "What type of Account woudl you like to open? Savings or Checking?" << endl;
+			while(c == 0){
+				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
+				getlin(cin,type_choice);
+				switch(type_choice){
+					case 'S':
+					Account = new Saving_Acct();
+					c = 1;
+					break;
+					
+					case 'C':
+					Account = new Checking_Acct();
+					c = 1;
+					break;
+					
+					default:
+					cout << "Invalid choice! Please Try again" << endl;
+					break;
+				}
+			}
+			//print info to new user file
+			//add menu for user, same as menu above for signed in user
+			break;
+			
+			case '4':
+			//exit program here
+			return 0;
 			break;
 			
 			default:
