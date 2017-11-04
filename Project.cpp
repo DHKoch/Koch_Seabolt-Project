@@ -10,11 +10,22 @@
 #include <ctime>
 #include <string>
 
-
 using namespace std;
 
-int user_login(long acct_num){
-	
+char user_acct(long acct_num){
+	char temp;
+	std::ifstream myfile;
+	char filename[30];
+	int n = sprintf(filename,"%li.txt",acct_num);
+	myfile.open(filename);
+	if(!myfile.is_open()){
+		return 'F';
+	}
+	else{
+		myfile >> temp;
+		myfile.close();
+		return temp;
+	}
 }
 
 //ABC base class
@@ -29,6 +40,8 @@ class Bank_Account {
 		char Acct_type;
 		bool frozen;
 	public:
+		Bank_Account(); //constructor for new account
+		Bank_Account(long acct_num); ,//parametric constructor for existing account
 		void deposit();
 		void withdraw();
 		virtual void check_balance();
@@ -36,6 +49,25 @@ class Bank_Account {
 		void close_Acct();
 		//transfer money function
 };
+
+Bank_Account::Bank_Account(){
+	//prompt user for all info 
+	//save to file?
+}
+
+Bank_Account::Bank_Account(long acct_num){
+	std::ifstream myfile;
+	char filename[30];
+	int n = sprintf(filename,"%li.txt",acct_num);
+	myfile.open(filename);
+	myfile >> Acct_type;
+	myfile >> userID;
+	myfile >> Account_Num;
+	myfile >> Password;
+	myfile >> balance;
+	myfile >> frozen;
+	myfile.close();
+}
 
 void Bank_Account::deposit() {
 	double amount, balance;
@@ -73,9 +105,14 @@ class Checking_Acct : public Bank_Account {
 	private:
 		
 	public:
+		Checking_Acct();
 		void check_balance();
 		//pay bill function??????????
 };
+
+Checking_Acct::Checking_Acct() : Bank_Account(){
+	//calls base constructor only so far
+}
 
 //derived class
 class Saving_Acct : public Bank_Account {
@@ -83,9 +120,15 @@ class Saving_Acct : public Bank_Account {
 		//float Interest_Rate;
 		
 	public:
+		Saving_Acct();
 		void check_balance();
 		void calc_Predicted_Interest();
 };
+
+Saving_Acct::Saving_Acct() : Bank_Account(){
+	//set interest rate based on balance
+	//need to read from rate file for this
+}
 
 class Manager_Acct {
 	private:
@@ -105,7 +148,7 @@ Manager::Mangaer(){
 	Password = pass_encrypt("Password123");
 }
 
-int Manager::manager_login(int acct_num){
+int Manager::manager_login(long acct_num){
 	string pass;
 	if(acct_num == empl_num){
 		cout << "please enter your password..." << endl;
@@ -172,6 +215,8 @@ string pass_encrypt(string password){
 }
 
 int main(void){
+	Bank_Account* Accout;
+	char type;
 	string acct_str;
 	long acct_num;
 	char choice;
@@ -192,7 +237,7 @@ int main(void){
 			Manager M();
 			cout << "Welcome! Please enter your employee number:" << endl;
 			getline(cin, acct_str);
-			sscanf(acct_str.c_str(),"%d",acct_num);
+			sscanf(acct_str.c_str(),"%li",acct_num);
 			b = M.manager_login(acct_num);
 			if(b==1){
 				cout << "Welcome Manager!" << endl;
@@ -210,7 +255,7 @@ int main(void){
 						case '1':
 						cout << "\nEnter the Account Number of the Account you would like to freeze:" << endl;
 						getline(cin,freeze_str);
-						sscanf(freeze_str.c_str(),"%d",freeze_num);
+						sscanf(freeze_str.c_str(),"%li",freeze_num);
 						M.freeze(freeze_num);
 						break;
 					
@@ -247,7 +292,29 @@ int main(void){
 			
 			case '2':
 			cout << "Welcome User! Please enter your Account Number:" <, endl;
-			getline(sin,acct_num);
+			getline(sin,acct_str);
+			sscanf(acct_str.c_str(),"%ld",acct_num);
+			type = user_acct(acct_num);
+			
+			if(type == 'F'){
+				cout << "This account number does not exist." << endl;
+				cout << "If you would like to create this account please select 'Create Account' from the main menu" << endl;
+			}
+			
+			else if(type == 'S'){
+				Account = new Saving_Acct();
+			}
+			
+			else if(type == 'C'){
+				Account = new Checking_Acct();
+			}
+			//add menu for user here
+			
+			break;
+			
+			case '3':
+			//create user account
+			//save no new user file
 			break;
 			
 			default:
