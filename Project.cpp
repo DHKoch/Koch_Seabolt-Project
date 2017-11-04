@@ -2,15 +2,20 @@
 //Thomas Seabolt
 //ECE 3220: Software Design in C/C++
 //Final Project
+
+//the password for manager login password is "Password123"
 #include <iostream>
 #include <fstream>
 #include <cstring>
 #include <ctime>
 #include <string>
-#define manager_acct_num = 123456789
-string manager_password = "Password123";
+
 
 using namespace std;
+
+int user_login(long acct_num){
+	
+}
 
 //ABC base class
 class Bank_Account {
@@ -30,47 +35,17 @@ class Bank_Account {
 		void view_translog();
 		void close_Acct();
 		//transfer money function
-}
-
-//derived class from ABC base class
-class Checking_Acct : public Bank_Account {
-	private:
-		
-	public:
-		void check_balance();
-		//pay bill function??????????
-}
-
-//derived class
-class Saving_Acct : public Bank_Account {
-	private:
-		float Interest_Rate;
-		time_t lastCompound; //see how this affects reading from file, should we have file type first and check to see if C or S then read in different
-	public:
-		void check_balance();
-		void calcInterest();
-}
-
-class Manager_Acct {
-	private:
-		string Password;
-		//userID?
-	public:
-		void freeze(long Account_Num);
-		void unfreeze(long Account_Num);
-		void Current_Rates();
-		void Adjust_Rate();
-}
+};
 
 void Bank_Account::deposit() {
 	double amount, balance;
 	string amountStr;
 	cout << "How much would you like to deposit?" << endl;
 	cin >> amountStr;
-	sscanf(amountStr, "%.2lf", amount);
-	//TODO access database, set balance
+	sscanf(amountStr.c_str(), "%.2lf", amount);
+	
 	balance += amount;
-	//TODO update balance in database
+	
 }
 
 void Bank_Account::withdraw() {
@@ -78,11 +53,9 @@ void Bank_Account::withdraw() {
 	string amountStr;
 	cout << "How much would you like to withdraw?" << endl;
 	cin >> amountStr;
-	sscanf(amountStr, "%.2lf", amount);
-	//TODO access database, set balance
+	sscanf(amountStr.c_str(), "%.2lf", amount);
 	if (balance - amount > 0) {
 		balance -= amount;
-		//TODO update balance in database
 		cout << "$" << amount << " withdrawn from account successfully";
 	}
 	else {
@@ -95,12 +68,49 @@ void Bank_Account::view_translog() {
 //the table and print all amounts/dates with the specified accountID. 
 }
 
-int manager_login(int acct_num){
-	string password;
-	if(acct_num == manager_acct_num){
+//derived class from ABC base class
+class Checking_Acct : public Bank_Account {
+	private:
+		
+	public:
+		void check_balance();
+		//pay bill function??????????
+};
+
+//derived class
+class Saving_Acct : public Bank_Account {
+	private:
+		//float Interest_Rate;
+		
+	public:
+		void check_balance();
+		void calc_Predicted_Interest();
+};
+
+class Manager_Acct {
+	private:
+		string Password;
+		int empl_num;
+	public:
+		Manager();
+		int manager_login(int acct_num);
+		void freeze(long Account_Num);
+		void unfreeze(long Account_Num);
+		void Current_Rates();
+		void Adjust_Rate();
+};
+
+Manager::Mangaer(){
+	empl_num = 12345678;
+	Password = pass_encrypt("Password123");
+}
+
+int Manager::manager_login(int acct_num){
+	string pass;
+	if(acct_num == empl_num){
 		cout << "please enter your password..." << endl;
-		cin >> password;
-		if(pass_encrypt(password) == pass_encrypt(manager_password)){
+		getline(cin,pass);
+		if(pass_encrypt(pass) == Password){
 			return 1;
 		}
 		else{
@@ -111,26 +121,6 @@ int manager_login(int acct_num){
 		return 0;
 	}
 	return 0;
-}
-
-string pass_encrypt(string password){
-	for(auto &c : password){
-		if(islower(c)){
-			c = toupper(c);
-		}
-		else if(isupper(c)){
-			c = tolower(c);
-		}
-	}
-	for(auto &c : password){
-		if(c=='z'){
-			c -= 1;
-		}
-		else if(c < 'z'){
-			c += 1;
-		}
-	}
-	return password;
 }
 
 void Manager_Acct::freeze(long Account_Num) {
@@ -161,30 +151,93 @@ void Manager_Acct::unfreeze(long Account_Num) {
 	}
 }
 	
+string pass_encrypt(string password){
+	for(auto &c : password){
+		if(islower(c)){
+			c = toupper(c);
+		}
+		else if(isupper(c)){
+			c = tolower(c);
+		}
+	}
+	for(auto &c : password){
+		if(c=='z'){
+			c -= 1;
+		}
+		else if(c < 'z'){
+			c += 1;
+		}
+	}
+	return password;
+}
 
 int main(void){
-	int acct_num;
+	string acct_str;
+	long acct_num;
 	char choice;
-	int a = 0;
 	int b = 0;
+	string freeze_str;
+	long freeze_num;
 	cout << "Welcome to Online Banking Inc." << endl;
 	cout << "------------------------------------------------" << endl << endl;
 	cout << "Who would you like to sign in as:" << endl
 	<< "1.) Manager" << endl
 	<< "2.) Customer" << endl;
 	cin >> choice;
+	cin.ignore();
 	while(a == 0){
 		switch(choice){
 			
 			case '1':
+			Manager M();
 			cout << "Welcome! Please enter your employee number:" << endl;
-			cin >> acct_num;
-			b = manager_login(acct_num);
+			getline(cin, acct_str);
+			sscanf(acct_str.c_str(),"%d",acct_num);
+			b = M.manager_login(acct_num);
 			if(b==1){
 				cout << "Welcome Manager!" << endl;
 				cout << "------------------------------------------------" << endl << endl;
-				//switch statement here with the options of freeze, view rate, change rates, and log out
-				a=1;
+				while(a == 0){
+					cout << "What would you like to do?" << endl;
+					cout << "1.) Freeze Customer Account" << endl;
+					cout << "2.) Un-Freeze Customer Account" << endl;
+					cout << "3.) View Current Interest Rates" << endl;
+					cout << "4.) Adjust Interest Rates" << endl;
+					cout << "5.) Log Out" << endl;
+					getline(cin, choice);
+					switch(choice){
+					
+						case '1':
+						cout << "\nEnter the Account Number of the Account you would like to freeze:" << endl;
+						getline(cin,freeze_str);
+						sscanf(freeze_str.c_str(),"%d",freeze_num);
+						M.freeze(freeze_num);
+						break;
+					
+						case '2':
+						cout << "\nEnter the Account Number of the Account you would like to unfreeze:" << endl;
+						getline(cin,freeze_str);
+						sscanf(freeze_str.c_str(),"%d",freeze_num);
+						M.unfreeze(freeze_num);
+						break;
+					
+						case '3':
+						cout << "Displaying the currect Interest rates..." << endl;
+						M.Current_Rates();
+						break;
+					
+						case '4':
+						M.Adjust_Rate();
+						break;
+						
+						case '5':
+						break;
+					
+						default:
+						break;
+					}
+				}
+				
 			}
 			else{
 				cout << "Login failed...." << endl;
@@ -194,12 +247,7 @@ int main(void){
 			
 			case '2':
 			cout << "Welcome User! Please enter your Account Number:" <, endl;
-			cin >> acct_num;
-			b = user_login;
-			if(b==1){
-				//create object of the correct type based off data from sql querry
-			}
-			a=1;
+			getline(sin,acct_num);
 			break;
 			
 			default:
