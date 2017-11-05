@@ -10,6 +10,7 @@
 #include <ctime>
 #include <string>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -68,18 +69,42 @@ class Bank_Account {
 		Bank_Account(long acct_num); //parametric constructor for existing account
 		void deposit();
 		void withdraw();
-		virtual void check_balance() {};
+		virtual void check_balance();
 		void view_translog();
 		void close_Acct();
 		//transfer money function
 };
 
 Bank_Account::Bank_Account(){
-	//ask user for info and error check the info
+	string in;
+	int i = 0;
+	cout << "Thank You for selecting to make an account with Bank inc." << endl;
+	cout << "First we need to gather some information from you" << endl;
+	cout << "What 8-digit acccount number would you like to have?" << endl;
+	while(i==0){
+		getline(cin,in);
+		sscanf(in.c_str(),"%08li", Account_Num);
+		if(Account_Num > 99999999 || Account_Num < 0){
+			cout << "Invalid choice of Account Number! Must be 8-digits or less. Please try again:" << endl;
+		}
+		else{
+			i = 1;
+		}
+	}
+	cout << "Enter your userID:" << endl;
+	getline(cin,in);
+	sscanf(in.c_str(),"%d", userID);
+	cout << "Enter your password you would like to have for this account:" << endl;
+	getline(cin,in);
+	sscanf(in.c_str(),"%s", Password);
+	frozen = 0;
+	cout << "Your starting balance will be $1000!" << endl;
+	balance = 1000.00;
+	
 }
 
 Bank_Account::Bank_Account(long acct_num){
-	//if acct_num = -1, ask for an account number. this way we only need one saving account constructor
+	
 	ifstream myfile;
 	char filename[30];
 	string in;
@@ -98,6 +123,10 @@ Bank_Account::Bank_Account(long acct_num){
 	getline(myfile, in);
 	sscanf(in.c_str(), "%d", frozen);
 	myfile.close();
+}
+
+void Bank_Account::check_balance(){
+	cout << "Your current baland is: $" << balance << endl;
 }
 
 void Bank_Account::deposit() {
@@ -136,10 +165,15 @@ class Checking_Acct : public Bank_Account {
 	private:
 		
 	public:
-		Checking_Acct(long acct_num = -1);
-		void check_balance() {};
+		Checking_Acct();
+		Checking_Acct(long acct_num);
+		//void check_balance();
 		//pay bill function??????????
 };
+
+Checking_Acct::Checking_Acct() : Bank_Account(){
+	Acct_type = 'C';
+}
 
 Checking_Acct::Checking_Acct(long acct_num) : Bank_Account(acct_num) {
 	//calls base constructor only so far
@@ -151,8 +185,9 @@ class Saving_Acct : public Bank_Account {
 		float Interest_Rate;
 		
 	public:
-		Saving_Acct(long acct_num = -1);
-		void check_balance() {};
+		Saving_Acct();
+		Saving_Acct(long acct_num);
+		void check_balance();
 		void calc_Predicted_Interest();
 };
 
@@ -196,6 +231,63 @@ Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 	}
 }
 
+Saving_Acct::Saving_Acct() : Bank_Account(){
+	Acct_type = 'S';
+	int i =0;
+	float rate;
+	int range;
+	vector<float>rates;
+	vector<int>ranges;
+	string filename = "Rates.txt", in;
+	ifstream file;
+	file.open(filename);
+	if(!file.is_open()){
+		//checks to see if file was opened
+		cout << "error Rates.txt file not opened" << endl;
+	}
+	for(i=0;i<4;i++){
+		getline(file, in);
+		sscanf(in.c_str(), "%f", rate);
+		getline(file, in);
+		sscanf(in.c_str(), "%d", range);
+		rates.push_back(rate);
+		ranges.push_back(range);
+	}
+	file.close();
+	if (balance>ranges[3]) {
+		Interest_Rate = rates[3];
+	}
+	else if (balance>ranges[2]) {
+		Interest_Rate = rates[2];
+	}
+	else if (balance>ranges[1]) {
+		Interest_Rate = rates[1];
+	}
+	else if (balance>ranges[0]) {
+		Interest_Rate = rates[0];
+	}
+	else {
+		Interest_Rate = 0.00;
+	}
+	cout << "The Interest Rate set for this account is: " << Interest_Rate*100 << "%" << endl;
+}
+
+void Saving_Acct::check_balance(){
+	cout << "Your current balance is: $" << balance << endl;
+	cout << "The Interest Rate of this account is:" << Interest_Rate*100 << "%" << endl;
+}
+
+void Saving_Acct::calc_Predicted_Interest(){
+	double temp;
+	int t;
+	string in;
+	cout << "For how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
+	getline(cin,in);
+	sscanf(in.c_str(),"%d",t);
+	temp = balance* pow(1+Interest_Rate,t);
+	cout << "Your expected account balance after " << t << " years is: $" << temp << endl;
+}
+
 class Manager_Acct {
 	private:
 		string Password;
@@ -205,8 +297,8 @@ class Manager_Acct {
 		int manager_login(long acct_num);
 		void freeze(long Account_Num);
 		void unfreeze(long Account_Num);
-		void Current_Rates() {};
-		void Adjust_Rate() {};
+		void Current_Rates();
+		void Adjust_Rate();
 };
 
 Manager_Acct::Manager_Acct(){
@@ -257,6 +349,99 @@ void Manager_Acct::unfreeze(long Account_Num) {
 	}
 	else {
 		cout << "Account not found." << endl;
+	}
+}
+
+void Manager_Acct::Current_Rates(){
+	int i = 0;
+	float rate;
+	int range;
+	vector<float>rates;
+	vector<int>ranges;
+	string filename = "Rates.txt", in;
+	ifstream file;
+	file.open(filename);
+	if(!file.is_open()){
+		//checks to see if file was opened
+		cout << "error Rates.txt file not opened" << endl;
+	}
+	for(i=0;i<4;i++){
+		getline(file, in);
+		sscanf(in.c_str(), "%f", rate);
+		getline(file, in);
+		sscanf(in.c_str(), "%d", range);
+		rates.push_back(rate);
+		ranges.push_back(range);
+	}
+	file.close();
+	for(i=0;i<4;i++){
+		cout << "For accounts with a balance > $" << ranges[i] << " the rate is:" << rates[i]*100 << "%" << endl;
+	}
+}
+
+void Manager_Acct::Adjust_Rate(){
+	string in;
+	int i = 0;
+	float rate;
+	int range;
+	int choice;
+	vector<float>rates;
+	vector<int>ranges;
+	string filename = "Rates.txt";
+	ifstream file;
+	file.open(filename);
+	if(!file.is_open()){
+		//checks to see if file was opened
+		cout << "error Rates.txt file not opened" << endl;
+	}
+	for(i=0;i<4;i++){
+		getline(file, in);
+		sscanf(in.c_str(), "%f", rate);
+		getline(file, in);
+		sscanf(in.c_str(), "%d", range);
+		rates.push_back(rate);
+		ranges.push_back(range);
+	}
+	file.close();
+	cout << "For what range of account balance would you like to adjust the interest rate?" << endl;
+	cout << "1.) >1000" << endl
+	<< "2.) >5000" << endl
+	<< "3.) >10000" << endl
+	<< "4.) >100000" << endl;
+	getline(cin,in);
+	sscanf(in.c_str(),"%d",choice);
+	switch(choice){
+		case 1:
+			cout << "Enter the new rate for accounts with a balance between $4999 - $1000:" << endl;
+			getline(cin,in);
+			sscanf(in.c_str(),"%f",rates[0]);
+			//need some error check for rates enetered
+		break;
+		
+		case 2:
+			cout << "Enter the new rate for accounts with a balance between $5000 - $9999:" << endl;
+			getline(cin,in);
+			sscanf(in.c_str(),"%f",rates[1]);
+			//need some error check for rates enetered
+		break;
+		
+		case 3:
+			cout << "Enter the new rate for accounts with a balance between $10000 - $99999:" << endl;
+			getline(cin,in);
+			sscanf(in.c_str(),"%f",rates[2]);
+			//need some error check for rates enetered
+		break;
+		
+		case 4:
+			cout << "Enter the new rate for accounts with a balance above $100000:" << endl;
+			getline(cin,in);
+			sscanf(in.c_str(),"%f",rates[3]);
+			//need some error check for rates enetered
+		break;
+		
+		default:
+		cout << "Invalid choice! Returning to menu..." << endl;
+		break;
 	}
 }
 
