@@ -4,6 +4,17 @@
 //Final Project
 
 //the password for manager login password is "Password123"
+
+//To Do List:
+/*
+figure out sscanf
+fix setting rate for checking account constructor
+print changed rates to rates file in adjust rates function
+need to test cases and make sure programs work
+add double check for closing account
+
+*/
+
 #include <iostream>
 #include <fstream>
 #include <cstring>
@@ -26,8 +37,7 @@ char user_acct(long acct_num){
 		return 'F';
 	}
 	else{
-		getline(myfile, in);
-		sscanf(in.c_str(), "%c", temp);
+		myfile >> temp;
 		myfile.close();
 		return temp;
 	}
@@ -58,20 +68,23 @@ class Bank_Account {
 	private:
 		
 	protected:
-		int userID;
+		int userID = 0;
 		long Account_Num;
 		double balance;
 		string Password;
 		char Acct_type;
-		bool frozen;
+		
 	public:
+		bool frozen;
 		Bank_Account(); //constructor for new account
 		Bank_Account(long acct_num); //parametric constructor for existing account
 		void deposit();
 		void withdraw();
 		virtual void check_balance();
-		void view_translog();
+		//void view_translog();
 		void close_Acct();
+		void print_to_file();
+		int does_exist();
 		//transfer money function
 };
 
@@ -82,9 +95,10 @@ Bank_Account::Bank_Account(){
 	cout << "First we need to gather some information from you" << endl;
 	cout << "What 8-digit acccount number would you like to have?" << endl;
 	while(i==0){
-		getline(cin,in);
-		sscanf(in.c_str(),"%08li", Account_Num);
-		if(Account_Num > 99999999 || Account_Num < 0){
+		cin >> Account_Num;
+		cin.ignore();
+		//sscanf(in.c_str(),"%08li", Account_Num);
+		if(Account_Num > 99999999 || Account_Num <= 0){
 			cout << "Invalid choice of Account Number! Must be 8-digits or less. Please try again:" << endl;
 		}
 		else{
@@ -92,11 +106,13 @@ Bank_Account::Bank_Account(){
 		}
 	}
 	cout << "Enter your userID:" << endl;
-	getline(cin,in);
-	sscanf(in.c_str(),"%d", userID);
+	cin >> userID;
+	cin.ignore();
+	//sscanf(in.c_str(),"%d", userID);
 	cout << "Enter your password you would like to have for this account:" << endl;
-	getline(cin,in);
-	sscanf(in.c_str(),"%s", Password);
+	cin >> Password;
+	cin.ignore();
+	//sscanf(in.c_str(),"%s", Password);
 	frozen = 0;
 	cout << "Your starting balance will be $1000!" << endl;
 	balance = 1000.00;
@@ -110,18 +126,16 @@ Bank_Account::Bank_Account(long acct_num){
 	string in;
 	sprintf(filename,"%li.txt",acct_num);
 	myfile.open(filename);
-	getline(myfile, in);
-	sscanf(in.c_str(), "%c", Acct_type);
-	getline(myfile, in);
-	sscanf(in.c_str(), "%d", userID);
-	getline(myfile, in);
-	sscanf(in.c_str(), "%ld", Account_Num);
-	getline(myfile, in);
-	sscanf(in.c_str(), "%s", Password);
-	getline(myfile, in);
-	sscanf(in.c_str(), "%lf", balance);
-	getline(myfile, in);
-	sscanf(in.c_str(), "%d", frozen);
+	if(!myfile.is_open()){
+		cout << "This Account does not exist." << endl;
+		return;
+	}
+	myfile >> Acct_type;
+	myfile >> userID;
+	myfile >> Account_Num;
+	myfile >> Password;
+	myfile >> balance;
+	myfile >> frozen;
 	myfile.close();
 }
 
@@ -129,23 +143,58 @@ void Bank_Account::check_balance(){
 	cout << "Your current baland is: $" << balance << endl;
 }
 
+void Bank_Account::print_to_file(){
+	char filename[30];
+	ofstream myfile;
+	sprintf(filename,"%08li.txt",Account_Num);
+	myfile.open(filename,ios::out);
+	myfile << Acct_type;
+	myfile << char(13) << char(10);
+	myfile << userID;
+	myfile << char(13) << char(10);
+	myfile << Account_Num;
+	myfile << char(13) << char(10);
+	myfile << Password;
+	myfile << char(13) << char(10);
+	myfile << balance;
+	myfile << char(13) << char(10);
+	myfile << frozen;
+	myfile << char(13) << char(10);
+	myfile.close();
+}
+
+int Bank_Account::does_exist(){
+	if(userID == 0){
+		//account does not exist
+		return 0;
+	}
+	else{
+		return 1;
+	}
+}
+
 void Bank_Account::deposit() {
-	double amount, balance;
-	string amountStr;
+	double amount;
+	//string amountStr;
 	cout << "How much would you like to deposit?" << endl;
-	cin >> amountStr;
-	sscanf(amountStr.c_str(), "%.2lf", amount);
-	
+	cin >> amount;
+	cin.ignore();
+	//sscanf(amountStr.c_str(), "%.2lf", amount);
+	cout << amount << endl;
+	cout << balance << endl;
 	balance += amount;
+	cout << balance << endl;
 	
+	this->print_to_file();
 }
 
 void Bank_Account::withdraw() {
 	double amount, balance;
-	string amountStr;
+	//string amountStr;
 	cout << "How much would you like to withdraw?" << endl;
-	cin >> amountStr;
-	sscanf(amountStr.c_str(), "%.2lf", amount);
+	cin >> amount;
+	cin.ignore();
+	//sscanf(amountStr.c_str(), "%.2lf", amount);
 	if (balance - amount > 0) {
 		balance -= amount;
 		cout << "$" << amount << " withdrawn from account successfully";
@@ -153,12 +202,18 @@ void Bank_Account::withdraw() {
 	else {
 		cout << "Insufficient funds for requested withdrawal.";
 	}
+	this->print_to_file();
 }
 
-void Bank_Account::view_translog() {
-//TODO could have a transactions table. Each transaction would have an accountID, an amount, and a date. We could go through
-//the table and print all amounts/dates with the specified accountID. 
+void Bank_Account::close_Acct(){
+	balance = 0;
+	Acct_type = 'F';
+	userID = 0;
+	cout << "Accout: " << Account_Num << " has now been closed" << endl;
+	this->print_to_file();
 }
+
+
 
 //derived class from ABC base class
 class Checking_Acct : public Bank_Account {
@@ -198,7 +253,7 @@ Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 	int range;
 	vector<float>rates;
 	vector<int>ranges;
-	string filename = "Rates.txt", in;
+	string filename = "Rates.txt";
 	ifstream file;
 	file.open(filename);
 	if(!file.is_open()){
@@ -206,24 +261,24 @@ Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 		cout << "error Rates.txt file not opened" << endl;
 	}
 	for(i=0;i<4;i++){
-		getline(file, in);
-		sscanf(in.c_str(), "%f", rate);
-		getline(file, in);
-		sscanf(in.c_str(), "%d", range);
+		file >> range;
+		file >> rate;
+		cout << range << endl;
+		cout << rate << endl;
 		rates.push_back(rate);
 		ranges.push_back(range);
 	}
 	file.close();
-	if (balance>ranges[3]) {
+	if (balance>=ranges[3]) {
 		Interest_Rate = rates[3];
 	}
-	else if (balance>ranges[2]) {
+	else if (balance>=ranges[2]) {
 		Interest_Rate = rates[2];
 	}
-	else if (balance>ranges[1]) {
+	else if (balance>=ranges[1]) {
 		Interest_Rate = rates[1];
 	}
-	else if (balance>ranges[0]) {
+	else if (balance>=ranges[0]) {
 		Interest_Rate = rates[0];
 	}
 	else {
@@ -246,10 +301,8 @@ Saving_Acct::Saving_Acct() : Bank_Account(){
 		cout << "error Rates.txt file not opened" << endl;
 	}
 	for(i=0;i<4;i++){
-		getline(file, in);
-		sscanf(in.c_str(), "%f", rate);
-		getline(file, in);
-		sscanf(in.c_str(), "%d", range);
+		file >> range;
+		file >> rate;
 		rates.push_back(rate);
 		ranges.push_back(range);
 	}
@@ -282,8 +335,9 @@ void Saving_Acct::calc_Predicted_Interest(){
 	int t;
 	string in;
 	cout << "For how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
-	getline(cin,in);
-	sscanf(in.c_str(),"%d",t);
+	cin >> t;
+	cin.ignore();
+	//sscanf(in.c_str(),"%d",t);
 	temp = balance* pow(1+Interest_Rate,t);
 	cout << "Your expected account balance after " << t << " years is: $" << temp << endl;
 }
@@ -325,30 +379,24 @@ int Manager_Acct::manager_login(long acct_num){
 }
 
 void Manager_Acct::freeze(long Account_Num) {
-	if (true /*TODO if account exists*/) {
-		if (true /*TODO if account isn't already frozen*/) {
-			//TODO set frozen to one in database for account
-		}
-		else {
-			cout << "Account is already frozen." << endl;
-		}
+	Bank_Account temp(Account_Num);
+	if(temp.does_exist() == 0){
+		cout << "Account: " << Account_Num << " does not exist. Account cannot be frozen" << endl;
 	}
-	else {
-		cout << "Account not found." << endl;
+	else{
+		temp.frozen = 1;
+		temp.print_to_file();
 	}
 }
 
 void Manager_Acct::unfreeze(long Account_Num) {
-	if (true /*TODO if account exists*/) {
-		if (true /*TODO if account is frozen*/) {
-			//TODO set frozen to zero in database for account
-		}
-		else {
-			cout << "Account is not frozen." << endl;
-		}
+	Bank_Account temp(Account_Num);
+	if(temp.does_exist() == 0){
+		cout << "Account: " << Account_Num << " does not exist. Account cannot be frozen" << endl;
 	}
-	else {
-		cout << "Account not found." << endl;
+	else{
+		temp.frozen = 0;
+		temp.print_to_file();
 	}
 }
 
@@ -366,10 +414,8 @@ void Manager_Acct::Current_Rates(){
 		cout << "error Rates.txt file not opened" << endl;
 	}
 	for(i=0;i<4;i++){
-		getline(file, in);
-		sscanf(in.c_str(), "%f", rate);
-		getline(file, in);
-		sscanf(in.c_str(), "%d", range);
+		file >> range;
+		file >> rate;
 		rates.push_back(rate);
 		ranges.push_back(range);
 	}
@@ -384,7 +430,8 @@ void Manager_Acct::Adjust_Rate(){
 	int i = 0;
 	float rate;
 	int range;
-	int choice;
+	char choice;
+	float temp;
 	vector<float>rates;
 	vector<int>ranges;
 	string filename = "Rates.txt";
@@ -395,10 +442,8 @@ void Manager_Acct::Adjust_Rate(){
 		cout << "error Rates.txt file not opened" << endl;
 	}
 	for(i=0;i<4;i++){
-		getline(file, in);
-		sscanf(in.c_str(), "%f", rate);
-		getline(file, in);
-		sscanf(in.c_str(), "%d", range);
+		file >> range;
+		file >> rate;
 		rates.push_back(rate);
 		ranges.push_back(range);
 	}
@@ -408,34 +453,42 @@ void Manager_Acct::Adjust_Rate(){
 	<< "2.) >5000" << endl
 	<< "3.) >10000" << endl
 	<< "4.) >100000" << endl;
-	getline(cin,in);
-	sscanf(in.c_str(),"%d",choice);
+	cin >> choice;
+	cin.ignore();
 	switch(choice){
-		case 1:
+		case '1':
 			cout << "Enter the new rate for accounts with a balance between $4999 - $1000:" << endl;
-			getline(cin,in);
-			sscanf(in.c_str(),"%f",rates[0]);
+			cin >> temp;
+			cin.ignore();
+			rates[0] = temp;
+			//sscanf(in.c_str(),"%f",rates[0]);
 			//need some error check for rates enetered
 		break;
 		
-		case 2:
+		case '2':
 			cout << "Enter the new rate for accounts with a balance between $5000 - $9999:" << endl;
-			getline(cin,in);
-			sscanf(in.c_str(),"%f",rates[1]);
+			cin >> temp;
+			cin.ignore();
+			rates[1] = temp;
+			//sscanf(in.c_str(),"%f",rates[1]);
 			//need some error check for rates enetered
 		break;
 		
-		case 3:
+		case '3':
 			cout << "Enter the new rate for accounts with a balance between $10000 - $99999:" << endl;
-			getline(cin,in);
-			sscanf(in.c_str(),"%f",rates[2]);
+			cin >> temp;
+			cin.ignore();
+			rates[2] = temp;
+			//sscanf(in.c_str(),"%f",rates[2]);
 			//need some error check for rates enetered
 		break;
 		
-		case 4:
+		case '4':
 			cout << "Enter the new rate for accounts with a balance above $100000:" << endl;
-			getline(cin,in);
-			sscanf(in.c_str(),"%f",rates[3]);
+			cin >> temp;
+			cin.ignore();
+			rates[3] = temp;
+			//sscanf(in.c_str(),"%f",rates[3]);
 			//need some error check for rates enetered
 		break;
 		
@@ -443,6 +496,7 @@ void Manager_Acct::Adjust_Rate(){
 		cout << "Invalid choice! Returning to menu..." << endl;
 		break;
 	}
+	//need to write rates to file still
 }
 
 int main(void){
@@ -452,7 +506,8 @@ int main(void){
 	Manager_Acct M;
 	string acct_str, freeze_str;
 	long acct_num, freeze_num;
-	int a = 0, b = 0, c = 0;
+	int a = 0, b = 0, c = 0, z = 0;
+	char choice2 = 0;
 	
 	cout << "Welcome to Online Banking Inc." << endl;
 	cout << "------------------------------------------------" << endl << endl;
@@ -468,8 +523,8 @@ int main(void){
 			
 			case '1':
 			cout << "Welcome! Please enter your employee number:" << endl;
-			getline(cin, acct_str);
-			sscanf(acct_str.c_str(),"%li",acct_num);
+			cin >> acct_num;
+			cin.ignore();
 			b = M.manager_login(acct_num);
 			if(b==1){
 				cout << "Welcome Manager!" << endl;
@@ -481,21 +536,23 @@ int main(void){
 					cout << "3.) View Current Interest Rates" << endl;
 					cout << "4.) Adjust Interest Rates" << endl;
 					cout << "5.) Log Out" << endl;
-					getline(cin, in);
-					sscanf(in.c_str(), "%c", choice);
+					cin >> choice;
+					cin.ignore();
 					switch(choice){
 					
 						case '1':
 						cout << "\nEnter the Account Number of the Account you would like to freeze:" << endl;
-						getline(cin,freeze_str);
-						sscanf(freeze_str.c_str(),"%li",freeze_num);
+						cin >> freeze_num;
+						cin.ignore();
+						//sscanf(freeze_str.c_str(),"%li",freeze_num);
 						M.freeze(freeze_num);
 						break;
 					
 						case '2':
 						cout << "\nEnter the Account Number of the Account you would like to unfreeze:" << endl;
-						getline(cin,freeze_str);
-						sscanf(freeze_str.c_str(),"%d",freeze_num);
+						cin >> freeze_num;
+						cin.ignore();
+						//sscanf(freeze_str.c_str(),"%d",freeze_num);
 						M.unfreeze(freeze_num);
 						break;
 					
@@ -509,9 +566,13 @@ int main(void){
 						break;
 						
 						case '5':
+						cout << "Closing Online Banking Inc. Thank you!" << endl;
+						cout << "------------------------------------------------" << endl << endl;
+						return 0;
 						break;
 					
 						default:
+						cout << "Invalid choice! Please try again" << endl;
 						break;
 					}
 				}
@@ -525,8 +586,9 @@ int main(void){
 			
 			case '2':
 				cout << "Welcome User! Please enter your Account Number:" << endl;
-				getline(cin,acct_str);
-				sscanf(acct_str.c_str(),"%ld",acct_num);
+				cin >> acct_num;
+				cin.ignore();
+				//sscanf(acct_str.c_str(),"%ld",acct_num);
 				type = user_acct(acct_num);
 			
 				if(type == 'F'){
@@ -541,9 +603,51 @@ int main(void){
 				else if(type == 'C'){
 					Account = new Checking_Acct(acct_num);
 				}
-				//add menu for user here
+				//add menu for user here and switch statement
+				cout << "Login Successful!" << endl;
+				cout << "------------------------------------------------" << endl << endl;
+				while(z == 0){
+					cout << "What would you like to do? Please select one of the following options:" << endl;
+					cout << "1.) View Account Balance" << endl
+					<< "2.) Deposit into Account" << endl
+					<< "3.) Withdraw from Account" << endl
+					<< "4.) Close Account" << endl
+					<< "5.) Log Out" << endl;
+					cin >> choice2;
+					cin.ignore();
+					//sscanf(in.c_str(),"%d",choice2);
+					switch(choice2){
+						case '1':
+						Account->check_balance();
+						break;
+						
+						case '2':
+						Account->deposit();
+						break;
+						
+						case '3':
+						Account->withdraw();
+						break;
+						
+						case '4':
+						//maybe add something to make sure user wants to close account
+						Account->close_Acct();
+						break;
+						
+						case '5':
+						cout << "Closing Online Banking Inc. Thank you!" << endl;
+						cout << "------------------------------------------------" << endl << endl;
+						return 0;
+						break;
+						
+						default:
+						cout << "Invalid Choice! Please try again" << endl;
+						break;
+					}
+				}
 			
-				break;
+			break;
+			
 			case '3':
 			cout << "Welcome!" << endl;
 			cout << "------------------------------------------------" << endl << endl;
@@ -551,8 +655,8 @@ int main(void){
 			cout << "What type of Account woudl you like to open? Savings or Checking?" << endl;
 			while(c == 0){
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
-				getline(cin,in);
-				sscanf(in.c_str(), "%c", type_choice);
+				cin >> type_choice;
+				cin.ignore();
 				switch(type_choice){
 					case 'S':
 					Account = new Saving_Acct();
@@ -569,8 +673,42 @@ int main(void){
 					break;
 				}
 			}
-			//print info to new user file
-			//add menu for user, same as menu above for signed in user
+			Account->print_to_file();
+			while(z == 0){
+					cout << "What would you like to do? Please select one of the following options:" << endl;
+					cout << "1.) View Account Balance" << endl
+					<< "2.) Deposit into Account" << endl
+					<< "3.) Withdraw from Account" << endl
+					<< "4.) Close Account" << endl
+					<< "5.) Log Out" << endl;
+					cin >> choice2;
+					cin.ignore();
+					switch(choice2){
+						case '1':
+						Account->check_balance();
+						break;
+						
+						case '2':
+						Account->deposit();
+						break;
+						
+						case '3':
+						Account->withdraw();
+						break;
+						
+						case '4':
+						//maybe add something to make sure user wants to close account
+						Account->close_Acct();
+						break;
+						
+						case '5':
+						cout << "Closing Online Banking Inc. Thank you!" << endl;
+						cout << "------------------------------------------------" << endl << endl;
+						return 0;
+						break;
+						
+					}
+				}
 			break;
 			
 			case '4':
