@@ -8,8 +8,6 @@
 //To Do List:
 /*
 figure out sscanf
-fix setting rate for checking account constructor
-print changed rates to rates file in adjust rates function
 need to test cases and make sure programs work
 add double check for closing account
 
@@ -78,8 +76,8 @@ class Bank_Account {
 		bool frozen;
 		Bank_Account(); //constructor for new account
 		Bank_Account(long acct_num); //parametric constructor for existing account
-		void deposit();
-		void withdraw();
+		virtual void deposit();
+		virtual void withdraw();
 		virtual void check_balance();
 		//void view_translog();
 		void close_Acct();
@@ -129,6 +127,7 @@ Bank_Account::Bank_Account(long acct_num){
 	if(!myfile.is_open()){
 		cout << "This Account does not exist." << endl;
 		return;
+		cout << "test Here" << endl;
 	}
 	myfile >> Acct_type;
 	myfile >> userID;
@@ -189,7 +188,7 @@ void Bank_Account::deposit() {
 }
 
 void Bank_Account::withdraw() {
-	double amount, balance;
+	double amount;
 	//string amountStr;
 	cout << "How much would you like to withdraw?" << endl;
 	cin >> amount;
@@ -242,12 +241,63 @@ class Saving_Acct : public Bank_Account {
 	public:
 		Saving_Acct();
 		Saving_Acct(long acct_num);
+		void deposit();
+		void withdraw();
 		void check_balance();
 		void calc_Predicted_Interest();
+		void Get_rate();
 };
 
 //default value of -1 for account number, so we only need one svaing constructor
 Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
+	this->Get_rate();
+}
+
+Saving_Acct::Saving_Acct() : Bank_Account(){
+	Acct_type = 'S';
+	this->Get_rate();
+	cout << "The Interest Rate set for this account is: " << Interest_Rate*100 << "%" << endl;
+}
+
+void Saving_Acct::deposit() {
+	double amount;
+	//string amountStr;
+	cout << "How much would you like to deposit?" << endl;
+	cin >> amount;
+	cin.ignore();
+	//sscanf(amountStr.c_str(), "%.2lf", amount);
+	
+	balance += amount;
+	cout << "$" << amount << " deposited to account successfully" << endl;
+	this->Get_rate();
+	this->print_to_file();
+}
+
+void Saving_Acct::withdraw() {
+	double amount;
+	//string amountStr;
+	cout << "How much would you like to withdraw?" << endl;
+	cin >> amount;
+	cin.ignore();
+	//sscanf(amountStr.c_str(), "%.2lf", amount);
+	if (balance - amount >= 0){
+		balance -= amount;
+		cout << "$" << amount << " withdrawn from account successfully" << endl;
+		this->Get_rate();
+		this->print_to_file();
+	}
+	else {
+		cout << "Insufficient funds for requested withdrawal." << endl;
+	}
+	
+}
+
+void Saving_Acct::check_balance(){
+	cout << "Your current balance is: $" << balance << endl;
+	cout << "The Interest Rate of this account is:" << Interest_Rate*100 << "%" << endl;
+}
+
+void Saving_Acct::Get_rate(){
 	int i =0;
 	float rate;
 	int range;
@@ -263,8 +313,6 @@ Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 	for(i=0;i<4;i++){
 		file >> range;
 		file >> rate;
-		cout << range << endl;
-		cout << rate << endl;
 		rates.push_back(rate);
 		ranges.push_back(range);
 	}
@@ -284,50 +332,6 @@ Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 	else {
 		Interest_Rate = 0.00;
 	}
-}
-
-Saving_Acct::Saving_Acct() : Bank_Account(){
-	Acct_type = 'S';
-	int i =0;
-	float rate;
-	int range;
-	vector<float>rates;
-	vector<int>ranges;
-	string filename = "Rates.txt", in;
-	ifstream file;
-	file.open(filename);
-	if(!file.is_open()){
-		//checks to see if file was opened
-		cout << "error Rates.txt file not opened" << endl;
-	}
-	for(i=0;i<4;i++){
-		file >> range;
-		file >> rate;
-		rates.push_back(rate);
-		ranges.push_back(range);
-	}
-	file.close();
-	if (balance>ranges[3]) {
-		Interest_Rate = rates[3];
-	}
-	else if (balance>ranges[2]) {
-		Interest_Rate = rates[2];
-	}
-	else if (balance>ranges[1]) {
-		Interest_Rate = rates[1];
-	}
-	else if (balance>ranges[0]) {
-		Interest_Rate = rates[0];
-	}
-	else {
-		Interest_Rate = 0.00;
-	}
-	cout << "The Interest Rate set for this account is: " << Interest_Rate*100 << "%" << endl;
-}
-
-void Saving_Acct::check_balance(){
-	cout << "Your current balance is: $" << balance << endl;
-	cout << "The Interest Rate of this account is:" << Interest_Rate*100 << "%" << endl;
 }
 
 void Saving_Acct::calc_Predicted_Interest(){
@@ -496,7 +500,12 @@ void Manager_Acct::Adjust_Rate(){
 		cout << "Invalid choice! Returning to menu..." << endl;
 		break;
 	}
-	//need to write rates to file still
+	ofstream myfile;
+	myfile.open(filename);
+	for(i=0;i<4;i++){
+		myfile << ranges[i] << " " << rates[i] << char(13) << char(10);
+	}
+	myfile.close();
 }
 
 int main(void){
@@ -594,6 +603,7 @@ int main(void){
 				if(type == 'F'){
 					cout << "This account number does not exist." << endl;
 					cout << "If you would like to create this account please select 'Create Account' from the main menu" << endl;
+					return 0;
 				}
 			
 				else if(type == 'S'){
@@ -632,6 +642,7 @@ int main(void){
 						case '4':
 						//maybe add something to make sure user wants to close account
 						Account->close_Acct();
+						return 0;
 						break;
 						
 						case '5':
@@ -699,6 +710,7 @@ int main(void){
 						case '4':
 						//maybe add something to make sure user wants to close account
 						Account->close_Acct();
+						return 0;
 						break;
 						
 						case '5':
@@ -712,7 +724,8 @@ int main(void){
 			break;
 			
 			case '4':
-			//exit program here
+			cout << "Closing Online Banking Inc. Thank you!" << endl;
+			cout << "------------------------------------------------" << endl << endl;
 			return 0;
 			break;
 			
