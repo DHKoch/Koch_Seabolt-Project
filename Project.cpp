@@ -3,13 +3,21 @@
 //ECE 3220: Software Design in C/C++
 //Final Project
 
-//the password for manager login password is "Password123"
-
-//To Do List:
 /*
-figure out sscanf
-need to test cases and make sure programs work
-add double check for closing account
+Please read the Banking App 1st release word document before running the demo
+The last paragraph in the document includes some instructions for running the program
+The Account Text files are also included in the zip file, these are necessary for the demo to run
+
+The structure of the account text files is:
+
+Account type (Char)
+User Id (int)
+Account number (Long int)
+Account Password (string)
+Balance (float)
+Frozen (Bool)
+
+
 
 */
 
