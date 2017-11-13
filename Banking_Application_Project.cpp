@@ -4,9 +4,13 @@
 //Final Project
 
 /*
+NOTICE:
+
 Please read the Banking App 1st release word document before running the demo
 The last paragraph in the document includes some instructions for running the program
 The Account Text files are also included in the zip file, these are necessary for the demo to run
+
+this current iteration only accpets the expected input type, this is ann issue we are working on
 
 The structure of the account text files is:
 
@@ -525,17 +529,16 @@ int main(void){
 	long acct_num, freeze_num;
 	int a = 0, b = 0, c = 0, z = 0;
 	char choice2 = 0;
-	
 	cout << "Welcome to Online Banking Inc." << endl;
-	cout << "------------------------------------------------" << endl << endl;
-	cout << "Please select an option to begin" << endl
-		<< "1.) Login as Manager" << endl
-		<< "2.) Login as Customer" << endl
-		<< "3.) Create New Customer Account" << endl;
-	
-	cin >> choice;
-	cin.ignore();
+		cout << "------------------------------------------------" << endl << endl;
 	while(a == 0){
+		cout << "Please select an option to begin" << endl
+			<< "1.) Login as Manager" << endl
+			<< "2.) Login as Customer" << endl
+			<< "3.) Create New Customer Account" << endl;
+	
+		cin >> choice;
+		cin.ignore();
 		switch(choice){
 			
 			case '1':
