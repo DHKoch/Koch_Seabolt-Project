@@ -381,6 +381,7 @@ int Manager_Acct::manager_login(long acct_num){
 	if(acct_num == empl_num){
 		cout << "please enter your password..." << endl;
 		getline(cin,pass);
+		cin.ignore();
 		if(pass_encrypt(pass) == Password){
 			return 1;
 		}
@@ -535,8 +536,8 @@ int main(void){
 		cout << "Please select an option to begin" << endl
 			<< "1.) Login as Manager" << endl
 			<< "2.) Login as Customer" << endl
-			<< "3.) Create New Customer Account" << endl;
-	
+			<< "3.) Create New Customer Account" << endl
+			<< "4.) Exit Program" << endl;
 		cin >> choice;
 		cin.ignore();
 		switch(choice){
