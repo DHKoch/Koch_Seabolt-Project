@@ -407,7 +407,6 @@ int Manager_Acct::manager_login(long acct_num){
 	if(acct_num == empl_num){
 		cout << "please enter your password..." << endl;
 		getline(cin,pass);
-		cin.ignore();
 		if(pass_encrypt(pass) == password){
 			return 1;
 		}
@@ -563,7 +562,7 @@ int main(void){
 	string acct_str, freeze_str;
 	long acct_num, freeze_num;
 	int a = 0, b = 0, c = 0, z = 0;
-	char choice2 = 0;
+	char choice2;
 	cout << "Welcome to Online Banking Inc." << endl;
 		cout << "------------------------------------------------" << endl << endl;
 	while(a == 0){
