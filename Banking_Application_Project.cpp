@@ -23,8 +23,10 @@ Frozen (Bool)
 */
 
 /*
+change where user is asked to enter password
+work on cancel option for the user when creating accountor manager login, something that returns them to main menu
 work on switch statement choice input
-add trasnaction log
+work on print translog function
 add transfer function
 add operators
 */
@@ -113,6 +115,7 @@ class Bank_Account {
 		void close_Acct();
 		void print_to_file();
 		int does_exist();
+		void print_to_translog(double value, char type);
 		//TODO: transfer money function
 };
 
@@ -212,6 +215,39 @@ void Bank_Account::print_to_file(){
 	myfile.close();
 }
 
+void Bank_Account::print_to_translog(double value, char type){
+	
+	char filename[30];
+	ofstream myfile;
+	sprintf(filename,"%08li_translog.txt",Account_Num);
+	myfile.open(filename,ios::out | ios::app);
+	
+	if(type == 'D'){
+		myfile << "Transaction Type: Deposit" << "  ";
+		myfile << "Amount Deposited: " << value << "  ";
+		myfile << "Previous Balance: " << balance - value << "  ";
+		myfile << "New Balance: " << balance << "  ";
+		myfile << char(13) << char(10);
+	}
+	
+	if(type == 'W'){
+		myfile << "Transaction Type: Withdraw" << "  ";
+		myfile << "Amount Withdrawn: " << value << "  ";
+		myfile << "Previous Balance: " << balance + value << "  ";
+		myfile << "New Balance: " << balance << "  ";
+		myfile << char(13) << char(10);
+	}
+	
+	if(type == 'T'){
+		myfile << "Transaction Type: Transfer" << "  ";
+		myfile << "Amount Transferred: " << value << "  ";
+		myfile << "Previous Balance: " << balance + value << "  ";
+		myfile << "New Balance: " << balance << "  ";
+		myfile << char(13) << char(10);
+	}
+	myfile.close();
+}
+
 //checks if account exists
 int Bank_Account::does_exist(){
 	if(userID == 0){
@@ -236,9 +272,10 @@ void Bank_Account::deposit() throw(int){
 	}
 	
 	balance += n;
-	cout << "The new balance of account - " << Account_Num << "is: " << balance << endl;
+	cout << "The new balance of account - " << Account_Num << "is: $" << balance << endl;
 	//updates file with new balance
 	this->print_to_file();
+	this->print_to_translog(n,'D');
 }
 
 //withdraw from account
@@ -261,6 +298,7 @@ void Bank_Account::withdraw() throw(int,char){
 	}
 	//updates file with new balance
 	this->print_to_file();
+	this->print_to_translog(n,'W');
 }
 
 //closes account
@@ -339,6 +377,7 @@ void Saving_Acct::deposit() throw(int){
 	//get new rate
 	this->Get_rate();
 	this->print_to_file();
+	this->print_to_translog(n,'D');
 }
 
 //withdraw from account
@@ -358,6 +397,7 @@ void Saving_Acct::withdraw() throw(int,char){
 		//set new rate
 		this->Get_rate();
 		this->print_to_file();
+		this->print_to_translog(n,'W');
 	}
 	else {
 		throw 'a';
@@ -605,7 +645,7 @@ int main(void){
 	Manager_Acct M;
 	string acct_str, freeze_str;
 	long acct_num, freeze_num;
-	int a = 0, b = 0, c = 0, z = 0;
+	int a = 0, b = 0, c = 0, z = 0, u =0;
 	char choice2;
 	cout << "Welcome to Online Banking Inc." << endl;
 		cout << "------------------------------------------------" << endl << endl;
@@ -783,9 +823,30 @@ int main(void){
 						break;
 						//close account
 						case '4':
-						//maybe add something to make sure user wants to close account
-						Account->close_Acct();
-						return 0;
+						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
+						u = 0;
+						while(u==0){
+							cin >> choice;
+							cin.ignore();
+							switch(choice){
+								case 'Y':
+									cout << "Closing account..." << endl;
+									Account->close_Acct();
+									cout << "Closing Online Banking Inc. Thank you!" << endl;
+									cout << "------------------------------------------------" << endl << endl;
+									return 0;
+								break;
+							
+								case 'N':
+									cout << "Account not closed. Returning to User menu." << endl;
+									u = 1;
+								break;
+								
+								default:
+									cout << "Incorrect choice please try again." << endl;
+								break;
+							}
+						}
 						break;
 						//exit
 						case '5':
@@ -868,9 +929,29 @@ int main(void){
 						break;
 						
 						case '4':
-						//maybe add something to make sure user wants to close account
-						Account->close_Acct();
-						return 0;
+						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
+						while(u==0){
+							cin >> choice;
+							cin.ignore();
+							switch(choice){
+								case 'Y':
+									cout << "Closing account..." << endl;
+									Account->close_Acct();
+									cout << "Closing Online Banking Inc. Thank you!" << endl;
+									cout << "------------------------------------------------" << endl << endl;
+									return 0;
+								break;
+							
+								case 'N':
+									cout << "Account not closed. Returning to User menu." << endl;
+									u=1;
+								break;
+								
+								default:
+									cout << "Incorrect choice please try again." << endl;
+								break;
+							}
+						}
 						break;
 						
 						case '5':
