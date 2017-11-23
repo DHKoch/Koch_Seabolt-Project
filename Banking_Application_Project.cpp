@@ -116,8 +116,19 @@ class Bank_Account {
 		void print_to_translog(double value, char type);
 		void print_translog();
 		void transfer(long acct_num);
+		void operator+(double amt);
+		void operator-(double amt);
 };
 
+void Bank_Account::operator+(double amt) {
+	balance += amt;
+	this->print_to_file();
+}
+
+void Bank_Account::operator-(double amt) {
+	balance -= amt;
+	this->print_to_file();
+}
 //gets account number, userID, password from user, creates account
 Bank_Account::Bank_Account(){
 	string in;
@@ -243,7 +254,7 @@ void Bank_Account::print_to_translog(double value, char type){
 	if(type == 'T'){
 		myfile << "Transaction Type: Transfer" << "  ";
 		myfile << "Amount Transferred: " << value << "  ";
-		myfile << "Previous Balance: " << balance + value << "  ";
+		myfile << "Previous Balance: " << balance - value << "  ";
 		myfile << "New Balance: " << balance << "  ";
 		myfile << char(13) << char(10);
 	}
@@ -289,10 +300,9 @@ void Bank_Account::deposit() throw(int){
 		throw 1;
 	}
 	
-	balance += n;
+	this->operator+(n);
 	cout << "The new balance of account - " << Account_Num << "is: $" << balance << endl;
 	//updates file with new balance
-	this->print_to_file();
 	this->print_to_translog(n,'D');
 }
 
@@ -308,14 +318,13 @@ void Bank_Account::withdraw() throw(int,char){
 		throw 1;
 	}
 	if (balance - n > 0) {//if funds are available
-		balance -= n;
+		this->operator-(n);
 		cout << "$" << amount << " withdrawn from account successfully";
 	}
 	else {
 		throw 'a';
 	}
 	//updates file with new balance
-	this->print_to_file();
 	this->print_to_translog(n,'W');
 }
 
@@ -348,11 +357,12 @@ void Bank_Account::transfer(long acct_num) {
 			cout << "Insufficient funds for transfer." << endl;
 		}
 		else {
-			cout << "1: " << transferee.balance << "   2: " << this->balance << endl;
-			transferee.balance += amount;
+			transferee + amount;
+			this->operator-(amount);
+			/*transferee.balance += amount;
 			this->balance -= amount;
 			transferee.print_to_file();
-			this->print_to_file();
+			this->print_to_file();*/
 			transferee.print_to_translog(amount, 'T');
 			this->print_to_translog((amount * -1), 'T');
 			cout << "Amount transferred successfully." << endl;
@@ -419,11 +429,10 @@ void Saving_Acct::deposit() throw(int){
 	if(n <= 0){
 		throw 1;
 	}
-	balance += n;
+	this->operator+(n);
 	cout << "The new balance of account: " << Account_Num << " is: " << balance << endl;
 	//get new rate
 	this->Get_rate();
-	this->print_to_file();
 	this->print_to_translog(n,'D');
 }
 
@@ -439,11 +448,10 @@ void Saving_Acct::withdraw() throw(int,char){
 		throw 1;
 	}
 	if (balance - n >= 0){//if funds are available
-		balance -= n;
+		this->operator-(n);
 		cout << "$" << amount << " withdrawn from account successfully" << endl;
 		//set new rate
 		this->Get_rate();
-		this->print_to_file();
 		this->print_to_translog(n,'W');
 	}
 	else {
@@ -716,12 +724,12 @@ int main(void){
 		switch(choice){
 			//manager
 			case '1':
-			cout << "Welcome! Please enter your employee number:" << endl;//attempt to login
+			cout << "Welcome! Please enter your employee number, or enter -1 to cancel:" << endl;//attempt to login
 			cin >> in;
 			cin.ignore();
 			acct_num = check_num(in);
 			if(acct_num == 0){
-				cout << "Invalid employee number! Returning to main menu." << endl;
+				cout << "Account number not entered, returning to main menu." << endl;
 				break;
 			}
 			b = M.manager_login(acct_num);
@@ -795,12 +803,12 @@ int main(void){
 			break;
 			//existing user
 			case '2':
-				cout << "Welcome User! Please enter your Account Number:" << endl;//attempt to login, need to add password check still
+				cout << "Welcome User! Please enter your Account Number, or enter -1 to cancel:" << endl;//attempt to login, need to add password check still
 				cin >> in;
 				cin.ignore();
 				acct_num = check_num(in);
 				if(acct_num == 0){
-					cout << "Invalid input for account number! Returning to main menu." << endl << endl;
+					cout << "Account number not entered, returning to main menu." << endl << endl;
 					break;
 				}
 				type = user_acct(acct_num);
