@@ -23,7 +23,7 @@ Frozen (Bool)
 */
 
 /*
-change where user is asked to enter password
+fix unfreeze function, so far it does not unfreeze the account and exits prgram unexpectedly
 work on cancel option for the user when creating accountor manager login, something that returns them to main menu
 work on switch statement choice input
 work on print translog function
@@ -111,6 +111,7 @@ class Bank_Account {
 		virtual void deposit() throw(int);
 		virtual void withdraw() throw(int,char);
 		virtual void check_balance();
+		void check_password() throw(int);
 		//void view_translog();
 		void close_Acct();
 		void print_to_file();
@@ -166,11 +167,12 @@ Bank_Account::Bank_Account(long acct_num){
 	char filename[30];
 	string in;
 	sprintf(filename,"%08li.txt",acct_num);
+	cout << filename << endl;
 	myfile.open(filename);
 	if(!myfile.is_open()){
 		cout << "This Account does not exist." << endl;
 		return;
-		cout << "test Here" << endl;
+		
 	}
 	myfile >> Acct_Type;
 	myfile >> userID;
@@ -179,13 +181,18 @@ Bank_Account::Bank_Account(long acct_num){
 	myfile >> balance;
 	myfile >> frozen;
 	myfile.close();
-	cout << "Please enter the password for this account: ";
-	cin >> in;
-	if(in != password){
-		throw 1;
-	}
 	if(frozen == 1){
 		throw 'a';
+	}
+}
+
+void Bank_Account::check_password() throw(int){
+	string in;
+	cout << "Please enter the password for this account: ";
+	cin >> in;
+	cin.ignore();
+	if(in != password){
+		throw 1;
 	}
 }
 
@@ -518,7 +525,13 @@ void Manager_Acct::freeze(long Account_Num) {
 
 //same as freeze's logic, but opposite function. Sets frozen to 0 instead of 1
 void Manager_Acct::unfreeze(long Account_Num) {
-	Bank_Account temp(Account_Num);
+	Bank_Account* temp;
+	try{
+		temp = new Bank_Account(Account_Num);
+	}
+	catch(char q){
+		//empty catch
+	}
 	if(temp.does_exist() == 0){
 		cout << "Account: " << Account_Num << " does not exist. Account cannot be frozen" << endl;
 	}
@@ -705,7 +718,9 @@ int main(void){
 							cout << "Invalid input for account number! Returning to manager menu." << endl;
 							break;
 						}
+						cout << "here" << endl;
 						M.unfreeze(freeze_num);
+						cout << "here 1" << endl;
 						break;
 						//view interest rates
 						case '3':
@@ -757,6 +772,7 @@ int main(void){
 				else if(type == 'S'){
 					try{
 						Account = new Saving_Acct(acct_num);
+						Account->check_password();
 					}
 					catch(int){
 						cout << "Incorrect Password for account! Returning to main menu." << endl << endl;
@@ -772,6 +788,7 @@ int main(void){
 				else if(type == 'C'){
 					try{
 						Account = new Checking_Acct(acct_num);
+						Account->check_password();
 					}
 					catch(int){
 						cout << "Incorrect Password for account! Returning to main menu." << endl << endl;
