@@ -25,7 +25,6 @@ Frozen (Bool)
 /*
 work on cancel option for the user when creating accountor manager login, something that returns them to main menu
 work on switch statement choice input
-work on print translog function
 add operators
 */
 
