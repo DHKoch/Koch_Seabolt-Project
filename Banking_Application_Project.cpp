@@ -977,8 +977,10 @@ int main(void){
 					cout << "1.) View Account Balance" << endl
 					<< "2.) Deposit into Account" << endl
 					<< "3.) Withdraw from Account" << endl
-					<< "4.) Close Account" << endl
-					<< "5.) Log Out" << endl;
+					<< "4.) Create Transfer" << endl
+					<< "5.) View Transaction Log" << endl
+					<< "6.) Close Account" << endl
+					<< "7.) Log Out" << endl;
 					cin >> choice2;
 					cin.ignore();
 					switch(choice2){
@@ -1010,6 +1012,23 @@ int main(void){
 						break;
 						
 						case '4':
+							cout << "What is the account number you would like to transfer to?" << endl;
+							getline(cin, acct_str);
+							sscanf(acct_str.c_str(), "%ld", &acct_num);
+							Account->transfer(acct_num);
+						break;
+						
+						case '5':
+							try{
+								Account->print_translog();
+							}
+							catch(int){
+								cout << "Returning to user menu." << endl;
+								
+							}
+						break;
+						
+						case '6':
 						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
 						while(u==0){
 							cin >> choice;
@@ -1035,7 +1054,7 @@ int main(void){
 						}
 						break;
 						
-						case '5':
+						case '7':
 						cout << "Closing Online Banking Inc. Thank you!" << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						return 0;
