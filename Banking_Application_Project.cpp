@@ -117,7 +117,7 @@ class Bank_Account {
 		void print_to_file();
 		int does_exist();
 		void print_to_translog(double value, char type);
-		//TODO: transfer money function
+		void transfer(long acct_num);
 };
 
 //gets account number, userID, password from user, creates account
@@ -319,6 +319,35 @@ void Bank_Account::close_Acct(){
 	this->print_to_file();
 }
 
+void Bank_Account::transfer(long acct_num) {
+	Bank_Account transferee(acct_num);
+	if (!transferee.does_exist()) {//account doesn't exist
+		cout << "Account does not exist, transfer cancelled." << endl;
+	}
+	else {
+		string amountStr;
+		double amount = 0;
+		cout << "How much would you like to transfer?" << endl;
+		getline(cin, amountStr);
+		sscanf(amountStr.c_str(), "%lf", &amount);
+		if (amount < 0) {
+			cout << "Amount cannot be negative." << endl;
+		}
+		else if (amount > this->balance) {
+			cout << "Insufficient funds for transfer." << endl;
+		}
+		else {
+			cout << "1: " << transferee.balance << "   2: " << this->balance << endl;
+			transferee.balance += amount;
+			this->balance -= amount;
+			transferee.print_to_file();
+			this->print_to_file();
+			transferee.print_to_translog(amount, 'T');
+			this->print_to_translog((amount * -1), 'T');
+			cout << "Amount transferred successfully." << endl;
+		}
+	}
+}
 
 
 //derived class from ABC base class
@@ -532,12 +561,12 @@ void Manager_Acct::unfreeze(long Account_Num) {
 	catch(char q){
 		//empty catch
 	}
-	if(temp.does_exist() == 0){
+	if(temp->does_exist() == 0){
 		cout << "Account: " << Account_Num << " does not exist. Account cannot be frozen" << endl;
 	}
 	else{
-		temp.frozen = 0;
-		temp.print_to_file();
+		temp->frozen = 0;
+		temp->print_to_file();
 	}
 }
 
@@ -808,8 +837,9 @@ int main(void){
 					cout << "1.) View Account Balance" << endl
 					<< "2.) Deposit into Account" << endl
 					<< "3.) Withdraw from Account" << endl
-					<< "4.) Close Account" << endl
-					<< "5.) Log Out" << endl;
+					<< "4.) Create Transfer" << endl
+					<< "5.) Close Account" << endl
+					<< "6.) Log Out" << endl;
 					cin >> choice2;
 					cin.ignore();
 					switch(choice2){
@@ -838,8 +868,15 @@ int main(void){
 							cout << "Insuficient funds for withdraw! Please try again" << endl << endl;
 						}
 						break;
-						//close account
+						//transfer
 						case '4':
+							cout << "What is the account number you would like to transfer to?" << endl;
+							getline(cin, acct_str);
+							sscanf(acct_str.c_str(), "%ld", &acct_num);
+							Account->transfer(acct_num);
+							break;
+						//close account
+						case '5':
 						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
 						u = 0;
 						while(u==0){
@@ -866,7 +903,7 @@ int main(void){
 						}
 						break;
 						//exit
-						case '5':
+						case '6':
 						cout << "Closing Online Banking Inc. Thank you!" << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						return 0;
