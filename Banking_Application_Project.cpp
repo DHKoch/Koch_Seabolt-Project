@@ -23,11 +23,9 @@ Frozen (Bool)
 */
 
 /*
-fix unfreeze function, so far it does not unfreeze the account and exits prgram unexpectedly
 work on cancel option for the user when creating accountor manager login, something that returns them to main menu
 work on switch statement choice input
 work on print translog function
-add transfer function
 add operators
 */
 
@@ -117,6 +115,7 @@ class Bank_Account {
 		void print_to_file();
 		int does_exist();
 		void print_to_translog(double value, char type);
+		void print_translog();
 		void transfer(long acct_num);
 };
 
@@ -250,6 +249,21 @@ void Bank_Account::print_to_translog(double value, char type){
 		myfile << char(13) << char(10);
 	}
 	myfile.close();
+}
+
+void Bank_Account::print_translog(){
+	ifstream myfile;
+	char filename[30];
+	string in;
+	sprintf(filename,"%08li_translog.txt",Account_Num);
+	myfile.open(filename);
+	if(!myfile.is_open()){
+		cout << "This Account does not have a transaction log yet." << endl;
+		throw 1;
+	}
+	while(getline(myfile,in)){
+		cout << in << endl;
+	}
 }
 
 //checks if account exists
@@ -840,8 +854,9 @@ int main(void){
 					<< "2.) Deposit into Account" << endl
 					<< "3.) Withdraw from Account" << endl
 					<< "4.) Create Transfer" << endl
-					<< "5.) Close Account" << endl
-					<< "6.) Log Out" << endl;
+					<< "5.) View Transaction Log" << endl
+					<< "6.) Close Account" << endl
+					<< "7.) Log Out" << endl;
 					cin >> choice2;
 					cin.ignore();
 					switch(choice2){
@@ -876,9 +891,19 @@ int main(void){
 							getline(cin, acct_str);
 							sscanf(acct_str.c_str(), "%ld", &acct_num);
 							Account->transfer(acct_num);
-							break;
-						//close account
+						break;
+						//transaction log
 						case '5':
+							try{
+								Account->print_translog();
+							}
+							catch(int){
+								cout << "Returning to user menu." << endl;
+								
+							}
+						break;
+						//close account
+						case '6':
 						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
 						u = 0;
 						while(u==0){
@@ -905,7 +930,7 @@ int main(void){
 						}
 						break;
 						//exit
-						case '6':
+						case '7':
 						cout << "Closing Online Banking Inc. Thank you!" << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						return 0;
