@@ -162,16 +162,15 @@ Bank_Account::Bank_Account(){
 
 //if account exists, gets info from its file
 Bank_Account::Bank_Account(long acct_num){
-	
+
 	ifstream myfile;
 	char filename[30];
 	string in;
 	sprintf(filename,"%08li.txt",acct_num);
-	cout << filename << endl;
 	myfile.open(filename);
 	if(!myfile.is_open()){
 		cout << "This Account does not exist." << endl;
-		return;
+		throw 1;
 		
 	}
 	myfile >> Acct_Type;
@@ -181,9 +180,7 @@ Bank_Account::Bank_Account(long acct_num){
 	myfile >> balance;
 	myfile >> frozen;
 	myfile.close();
-	if(frozen == 1){
-		throw 'a';
-	}
+	
 }
 
 void Bank_Account::check_password() throw(int){
@@ -257,6 +254,7 @@ void Bank_Account::print_to_translog(double value, char type){
 
 //checks if account exists
 int Bank_Account::does_exist(){
+	cout << userID << endl;
 	if(userID == 0){
 		//account does not exist
 		return 0;
@@ -555,19 +553,21 @@ void Manager_Acct::freeze(long Account_Num) {
 //same as freeze's logic, but opposite function. Sets frozen to 0 instead of 1
 void Manager_Acct::unfreeze(long Account_Num) {
 	Bank_Account* temp;
+	cout << "Account Number: " << Account_Num << endl;
 	try{
 		temp = new Bank_Account(Account_Num);
 	}
 	catch(char q){
 		//empty catch
 	}
-	if(temp->does_exist() == 0){
-		cout << "Account: " << Account_Num << " does not exist. Account cannot be frozen" << endl;
+	catch(int r){
+		cout << "here" << endl;
+		return;
 	}
-	else{
-		temp->frozen = 0;
-		temp->print_to_file();
-	}
+	cout << "Here 2" << endl;
+	temp->frozen = 0;
+	temp->print_to_file();
+	
 }
 
 //view current interest rates/ ranges
@@ -747,9 +747,9 @@ int main(void){
 							cout << "Invalid input for account number! Returning to manager menu." << endl;
 							break;
 						}
-						cout << "here" << endl;
+					
 						M.unfreeze(freeze_num);
-						cout << "here 1" << endl;
+				
 						break;
 						//view interest rates
 						case '3':
@@ -807,7 +807,8 @@ int main(void){
 						cout << "Incorrect Password for account! Returning to main menu." << endl << endl;
 						break;
 					}
-					catch(char t){
+					
+					if(Account->frozen == 1){
 						cout << "This account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
 						cout << "Returing to main menu" << endl;
 						break;
@@ -823,6 +824,7 @@ int main(void){
 						cout << "Incorrect Password for account! Returning to main menu." << endl << endl;
 						break;
 					}
+				
 					catch(char t){
 						cout << "This account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
 						cout << "Returing to main menu" << endl;
