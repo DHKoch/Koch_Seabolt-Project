@@ -644,7 +644,8 @@ void Manager_Acct::Current_Rates(){
 	}
 	file.close();
 	for(i=0;i<4;i++){
-		cout << "For accounts with a balance > $" << ranges[i] << " the rate is:" << rates[i]*100 << "%" << endl; 	//print rate/range at i (I think this would be fine as the last line in the first for loop)
+		cout << "For accounts with a balance > $" << ranges[i] << " the rate is:" << rates[i]*100 << "%" << endl; 	
+		//print rate/range at i (I think this would be fine as the last line in the first for loop)
 	}
 }
 
