@@ -23,9 +23,13 @@ Frozen (Bool)
 */
 
 /*
-work on switch statement choice input
 add pay bill for checking account only/ need to change transaction stuff to virtual for checking account
 add option to view calculated interest on savings account only
+*/
+
+//Fixed but could use more testing
+/*
+work on switch statement choice input
 */
 
 #include <iostream>
