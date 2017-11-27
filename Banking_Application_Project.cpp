@@ -25,7 +25,8 @@ Frozen (Bool)
 /*
 work on cancel option for the user when creating accountor manager login, something that returns them to main menu
 work on switch statement choice input
-add operators
+add pay bill for checking account only
+add option to view calculated interest on savings accoutn only
 */
 
 #include <iostream>
@@ -61,6 +62,30 @@ long check_num(string num){
 	n = atol(num.c_str());
 	if(n<=0){
 		return 0;
+	}
+	else{
+		return n;
+	}
+}
+
+float check_rate(string rate){
+	float n = 0;
+	char choice;
+	n = atof(rate.c_str());
+	if(n==0){
+		cout << "If you are trying to change the rate to 0.00% please enter 'Y' if not enter 'N' to try again." << endl;
+		cin >> choice;
+		cin.ignore();
+		if(choice == 'Y'){
+			return 0;
+		}
+		else{
+			return -1;
+		}
+	}
+	else if(n<0){
+		cout << "Rate cannot be negative please try again!" << endl;
+		return -1;
 	}
 	else{
 		return n;
@@ -109,7 +134,6 @@ class Bank_Account {
 		virtual void withdraw() throw(int,char);
 		virtual void check_balance();
 		void check_password() throw(int);
-		//void view_translog();
 		void close_Acct();
 		void print_to_file();
 		int does_exist();
@@ -268,6 +292,10 @@ void Bank_Account::print_translog(){
 	sprintf(filename,"%08li_translog.txt",Account_Num);
 	myfile.open(filename);
 	if(!myfile.is_open()){
+		cout << "This Account does not have a transaction log yet." << endl;
+		throw 1;
+	}
+	if ( myfile.peek() == std::ifstream::traits_type::eof() ){
 		cout << "This Account does not have a transaction log yet." << endl;
 		throw 1;
 	}
@@ -561,20 +589,7 @@ int Manager_Acct::manager_login(long acct_num){
 
 //freeze an account
 void Manager_Acct::freeze(long Account_Num) {
-	Bank_Account temp(Account_Num);
-	if(temp.does_exist() == 0){//make sure account exists
-		cout << "Account: " << Account_Num << " does not exist. Account cannot be frozen" << endl;
-	}
-	else{//if it exists, set frozen to one and write to file
-		temp.frozen = 1;
-		temp.print_to_file();
-	}
-}
-
-//same as freeze's logic, but opposite function. Sets frozen to 0 instead of 1
-void Manager_Acct::unfreeze(long Account_Num) {
 	Bank_Account* temp;
-	cout << "Account Number: " << Account_Num << endl;
 	try{
 		temp = new Bank_Account(Account_Num);
 	}
@@ -582,10 +597,25 @@ void Manager_Acct::unfreeze(long Account_Num) {
 		//empty catch
 	}
 	catch(int r){
-		cout << "here" << endl;
 		return;
 	}
-	cout << "Here 2" << endl;
+	temp->frozen = 1;
+	temp->print_to_file();
+	
+}
+
+//same as freeze's logic, but opposite function. Sets frozen to 0 instead of 1
+void Manager_Acct::unfreeze(long Account_Num) {
+	Bank_Account* temp;
+	try{
+		temp = new Bank_Account(Account_Num);
+	}
+	catch(char q){
+		//empty catch
+	}
+	catch(int r){
+		return;
+	}
 	temp->frozen = 0;
 	temp->print_to_file();
 	
@@ -654,38 +684,42 @@ void Manager_Acct::Adjust_Rate(){
 	switch(choice){
 		case '1':
 			cout << "Enter the new rate for accounts with a balance between $4999 - $1000:" << endl;
-			cin >> temp;
+			cin >> in;
 			cin.ignore();
+			temp = check_rate(in);
+			if(temp == -1)
+				break;
 			rates[0] = temp;
-			//sscanf(in.c_str(),"%f",rates[0]);
-			//need some error check for rates entered
 		break;
 		
 		case '2':
 			cout << "Enter the new rate for accounts with a balance between $5000 - $9999:" << endl;
-			cin >> temp;
+			cin >> in;
 			cin.ignore();
+			temp = check_rate(in);
+			if(temp == -1)
+				break;
 			rates[1] = temp;
-			//sscanf(in.c_str(),"%f",rates[1]);
-			//need some error check for rates entered
 		break;
 		
 		case '3':
 			cout << "Enter the new rate for accounts with a balance between $10000 - $99999:" << endl;
-			cin >> temp;
+			cin >> in;
 			cin.ignore();
+			temp = check_rate(in);
+			if(temp == -1)
+				break;
 			rates[2] = temp;
-			//sscanf(in.c_str(),"%f",rates[2]);
-			//need some error check for rates entered
 		break;
 		
 		case '4':
 			cout << "Enter the new rate for accounts with a balance above $100000:" << endl;
-			cin >> temp;
+			cin >> in;
 			cin.ignore();
+			temp = check_rate(in);
+			if(temp == -1)
+				break;
 			rates[3] = temp;
-			//sscanf(in.c_str(),"%f",rates[3]);
-			//need some error check for rates entered
 		break;
 		
 		default:
@@ -855,6 +889,7 @@ int main(void){
 				//add menu for user here and switch statement
 				cout << "Login Successful!" << endl;
 				cout << "------------------------------------------------" << endl << endl;
+				z = 0;
 				while(z == 0){
 					cout << "What would you like to do? Please select one of the following options:" << endl;
 					cout << "1.) View Account Balance" << endl
@@ -938,9 +973,9 @@ int main(void){
 						break;
 						//exit
 						case '7':
-						cout << "Closing Online Banking Inc. Thank you!" << endl;
+						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
-						return 0;
+						z = 1;
 						break;
 						//default
 						default:
@@ -978,6 +1013,7 @@ int main(void){
 			}
 			//create file
 			Account->print_to_file();
+			z = 0;
 			while(z == 0){
 				//same choices as existing user, could make this a function to cut down on code
 					cout << "What would you like to do? Please select one of the following options:" << endl;
@@ -1062,9 +1098,9 @@ int main(void){
 						break;
 						
 						case '7':
-						cout << "Closing Online Banking Inc. Thank you!" << endl;
+						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
-						return 0;
+						z = 1;
 						break;
 						
 					}
