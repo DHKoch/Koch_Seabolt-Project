@@ -38,6 +38,14 @@ add option to view calculated interest on savings account only
 
 using namespace std;
 
+//determines if input length is not one character
+int check_input(string inStr) {
+	if(inStr.length() != 1) {
+		return 0;//invalid
+	}
+	return 1;//valid
+}
+
 //returns type of account
 char user_acct(long acct_num){
 	char temp;
@@ -737,13 +745,13 @@ void Manager_Acct::Adjust_Rate(){
 //main, presents menu to user and allows them to perform actions on their accounts
 int main(void){
 	string in;
-	char type_choice, type, choice;
+	char type_choice, type;
+	string choiceStr, choiceStr2;
 	Bank_Account* Account;
 	Manager_Acct M;
 	string acct_str, freeze_str;
 	long acct_num, freeze_num;
-	int a = 0, b = 0, c = 0, z = 0, u =0;
-	char choice2;
+	int a = 0, b = 0, c = 0, z = 0, u =0, choice = -1, choice2 = -1;
 	cout << "Welcome to Online Banking Inc." << endl;
 		cout << "------------------------------------------------" << endl << endl;
 	while(a == 0){
@@ -752,12 +760,18 @@ int main(void){
 			<< "2.) Login as Customer" << endl
 			<< "3.) Create New Customer Account" << endl
 			<< "4.) Exit Program" << endl;
-		cin >> choice;
+		cin >> choiceStr;
 		cin.ignore();
+		if (check_input(choiceStr) == 0) {
+			choice = -1; //force to go to default
+		}
+		else {
+			sscanf(choiceStr.c_str(), "%d", &choice);
+		}
 		//go to choice
 		switch(choice){
 			//manager
-			case '1':
+			case 1:
 			cout << "Welcome! Please enter your employee number, or enter -1 to cancel:" << endl;//attempt to login
 			cin >> in;
 			cin.ignore();
@@ -778,11 +792,19 @@ int main(void){
 					cout << "3.) View Current Interest Rates" << endl;
 					cout << "4.) Adjust Interest Rates" << endl;
 					cout << "5.) Log Out" << endl;
-					cin >> choice;
+					choiceStr = ""; //reset values
+					choice = -1;
+					cin >> choiceStr;
 					cin.ignore();
+					if (check_input(choiceStr) == 0) {
+						choice = -1; //-1 will go to default in the switch
+					}
+					else {
+						sscanf(choiceStr.c_str(), "%d", &choice);//string is only one character long. If it is an int, choice will use it. Otherwise, choice is -1 and will go to default
+					}
 					switch(choice){
 						//freeze
-						case '1':
+						case 1:
 						cout << "\nEnter the Account Number of the Account you would like to freeze:" << endl;
 						cin >> in;
 						freeze_num = check_num(in);
@@ -794,7 +816,7 @@ int main(void){
 						M.freeze(freeze_num);
 						break;
 						//unfreeze
-						case '2':
+						case 2:
 						cout << "\nEnter the Account Number of the Account you would like to unfreeze:" << endl;
 						cin >> in;
 						freeze_num = check_num(in);
@@ -807,16 +829,16 @@ int main(void){
 				
 						break;
 						//view interest rates
-						case '3':
+						case 3:
 						cout << "Displaying the currect Interest rates..." << endl;
 						M.Current_Rates();
 						break;
 						//adjust interest rates
-						case '4':
+						case 4:
 						M.Adjust_Rate();
 						break;
 						//exit
-						case '5':
+						case 5:
 						cout << "Closing Online Banking Inc. Thank you!" << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						return 0;
@@ -836,7 +858,7 @@ int main(void){
 			}
 			break;
 			//existing user
-			case '2':
+			case 2:
 				cout << "Welcome User! Please enter your Account Number, or enter -1 to cancel:" << endl;//attempt to login, need to add password check still
 				cin >> in;
 				cin.ignore();
@@ -899,15 +921,21 @@ int main(void){
 					<< "5.) View Transaction Log" << endl
 					<< "6.) Close Account" << endl
 					<< "7.) Log Out" << endl;
-					cin >> choice2;
+					cin >> choiceStr2;
 					cin.ignore();
+					if (check_input(choiceStr2) == 0) {
+						choice2 = -1; //force to go to default
+					}
+					else {
+						sscanf(choiceStr2.c_str(), "%d", &choice2);
+					}
 					switch(choice2){
 						//check balance
-						case '1':
+						case 1:
 						Account->check_balance();
 						break;
 						//deposit
-						case '2':
+						case 2:
 						try{
 							Account->deposit();
 						}
@@ -916,7 +944,7 @@ int main(void){
 						}
 						break;
 						//withdraw
-						case '3':
+						case 3:
 						try{
 							Account->withdraw();
 						}
@@ -928,14 +956,14 @@ int main(void){
 						}
 						break;
 						//transfer
-						case '4':
+						case 4:
 							cout << "What is the account number you would like to transfer to?" << endl;
 							getline(cin, acct_str);
 							sscanf(acct_str.c_str(), "%ld", &acct_num);
 							Account->transfer(acct_num);
 						break;
 						//transaction log
-						case '5':
+						case 5:
 							try{
 								Account->print_translog();
 							}
@@ -945,14 +973,22 @@ int main(void){
 							}
 						break;
 						//close account
-						case '6':
-						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
+						case 6:
+						cout << "\nAre you sure you would like to close your account? Enter '1' for yes or '2' for no." << endl;
 						u = 0;
 						while(u==0){
-							cin >> choice;
+							choiceStr = ""; //reset values 
+							choice = -1;
+							cin >> choiceStr;
 							cin.ignore();
+							if (check_input(choiceStr) == 0) {
+								choice = -1; //force to go to default
+							}
+							else {
+								sscanf(choiceStr.c_str(), "%d", &choice);
+							}
 							switch(choice){
-								case 'Y':
+								case 1:
 									cout << "Closing account..." << endl;
 									Account->close_Acct();
 									cout << "Closing Online Banking Inc. Thank you!" << endl;
@@ -960,7 +996,7 @@ int main(void){
 									return 0;
 								break;
 							
-								case 'N':
+								case 2:
 									cout << "Account not closed. Returning to User menu." << endl;
 									u = 1;
 								break;
@@ -972,7 +1008,7 @@ int main(void){
 						}
 						break;
 						//exit
-						case '7':
+						case 7:
 						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						z = 1;
@@ -986,7 +1022,7 @@ int main(void){
 			
 			break;
 			//new user
-			case '3':
+			case 3:
 			cout << "Welcome!" << endl;
 			cout << "------------------------------------------------" << endl << endl;
 			cout << "To create your account we need to gather some information from you" << endl;
@@ -1024,15 +1060,21 @@ int main(void){
 					<< "5.) View Transaction Log" << endl
 					<< "6.) Close Account" << endl
 					<< "7.) Log Out" << endl;
-					cin >> choice2;
+					cin >> choiceStr2;
 					cin.ignore();
+					if (check_input(choiceStr2) == 0) {
+						choice2 = -1; //force to go to default
+					}
+					else {
+						sscanf(choiceStr2.c_str(), "%d", &choice2);
+					}
 					switch(choice2){
-						case '1':
+						case 1:
 						Account->check_balance();
 						break;
 						
 						//deposit
-						case '2':
+						case 2:
 						try{
 							Account->deposit();
 						}
@@ -1042,7 +1084,7 @@ int main(void){
 						break;
 						
 						//withdraw
-						case '3':
+						case 3:
 						try{
 							Account->withdraw();
 						}
@@ -1054,14 +1096,14 @@ int main(void){
 						}
 						break;
 						
-						case '4':
+						case 4:
 							cout << "What is the account number you would like to transfer to?" << endl;
 							getline(cin, acct_str);
 							sscanf(acct_str.c_str(), "%ld", &acct_num);
 							Account->transfer(acct_num);
 						break;
 						
-						case '5':
+						case 5:
 							try{
 								Account->print_translog();
 							}
@@ -1071,11 +1113,19 @@ int main(void){
 							}
 						break;
 						
-						case '6':
+						case 6:
 						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
 						while(u==0){
-							cin >> choice;
+							choiceStr = ""; //reset values
+							choice = -1;
+							cin >> choiceStr;
 							cin.ignore();
+							if (check_input(choiceStr) == 0) {
+								choice = -1; //force to go to default
+							}
+							else {
+								sscanf(choiceStr.c_str(), "%d", &choice);
+							}
 							switch(choice){
 								case 'Y':
 									cout << "Closing account..." << endl;
@@ -1097,7 +1147,7 @@ int main(void){
 						}
 						break;
 						
-						case '7':
+						case 7:
 						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						z = 1;
@@ -1107,7 +1157,7 @@ int main(void){
 				}
 			break;
 			
-			case '4':
+			case 4:
 			cout << "Closing Online Banking Inc. Thank you!" << endl;
 			cout << "------------------------------------------------" << endl << endl;
 			return 0;
