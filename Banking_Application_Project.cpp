@@ -23,10 +23,9 @@ Frozen (Bool)
 */
 
 /*
-work on cancel option for the user when creating accountor manager login, something that returns them to main menu
 work on switch statement choice input
-add pay bill for checking account only
-add option to view calculated interest on savings accoutn only
+add pay bill for checking account only/ need to change transaction stuff to virtual for checking account
+add option to view calculated interest on savings account only
 */
 
 #include <iostream>
