@@ -48,7 +48,7 @@ int check_input(string inStr) {
 	if(inStr.length() != 1) {
 		return 0;//invalid
 	}
-	if(atof(inStr.c_str()) == 0 || atof(inStr.c_str())>7){
+	if(atof(inStr.c_str()) == 0 || atof(inStr.c_str())>8){
 		return 0;
 	}
 	return 1;//valid
@@ -155,8 +155,10 @@ class Bank_Account {
 		void print_to_translog(double value, char type);
 		void print_translog();
 		void transfer(long acct_num);
+		char getAcccountType();
 		void operator+(double amt);
 		void operator-(double amt);
+		virtual void Calc_Predicted_Interest(){};
 };
 
 void Bank_Account::operator+(double amt) {
@@ -168,6 +170,11 @@ void Bank_Account::operator-(double amt) {
 	balance -= amt;
 	this->print_to_file();
 }
+
+char Bank_Account::getAcccountType(){
+	return Acct_Type;
+}
+
 //gets account number, userID, password from user, creates account
 Bank_Account::Bank_Account(){
 	string in;
@@ -422,6 +429,7 @@ class Checking_Acct : public Bank_Account {
 	public:
 		Checking_Acct();
 		Checking_Acct(long acct_num);
+		void Calc_Predicted_Interest(){};
 		//void check_balance();
 		//pay bill function??????????
 };
@@ -553,15 +561,19 @@ void Saving_Acct::Get_rate(){
 //predicts interest
 void Saving_Acct::Calc_Predicted_Interest(){
 	double temp;
-	int t;
-	string in;
+	string t;
+	long n;
 	cout << "For how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
 	cin >> t;
 	cin.ignore();
-	//sscanf(in.c_str(),"%d",t);
+	n = check_num(t);
+	if(n == 0){
+		cout << "Invalid Input for years. Returning to User Menu." << endl << endl;
+		return;
+	}
 	//interest calculation
-	temp = balance* pow(1+Interest_Rate,t);
-	cout << "Your expected account balance after " << t << " years is: $" << temp << endl;
+	temp = balance* pow(1+Interest_Rate,n);
+	cout << "Your expected account balance after " << n << " years is: $" << temp << endl << endl;
 }
 
 //class for managing accounts
@@ -929,8 +941,9 @@ int main(void){
 					<< "3.) Withdraw from Account" << endl
 					<< "4.) Create Transfer" << endl
 					<< "5.) View Transaction Log" << endl
-					<< "6.) Close Account" << endl
-					<< "7.) Log Out" << endl;
+					<< "6.) Calculate Predicted Interest" << endl
+					<< "7.) Close Account" << endl
+					<< "8.) Log Out" << endl;
 					cin >> choiceStr2;
 					cin.ignore();
 					if (check_input(choiceStr2) == 0) {
@@ -982,8 +995,19 @@ int main(void){
 								
 							}
 						break;
-						//close account
+						
 						case 6:
+							if(Account->getAcccountType() != 'S'){
+								cout << "Interest can only be calculated on Savings Accounts. Returning to User Menu." << endl << endl;
+								break;
+							}
+							else{
+								Account->Calc_Predicted_Interest();
+							}
+						break;
+						
+						//close account
+						case 7:
 						cout << "\nAre you sure you would like to close your account? Enter '1' for yes or '2' for no." << endl;
 						u = 0;
 						while(u==0){
@@ -1018,7 +1042,7 @@ int main(void){
 						}
 						break;
 						//exit
-						case 7:
+						case 8:
 						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						z = 1;
@@ -1068,8 +1092,9 @@ int main(void){
 					<< "3.) Withdraw from Account" << endl
 					<< "4.) Create Transfer" << endl
 					<< "5.) View Transaction Log" << endl
-					<< "6.) Close Account" << endl
-					<< "7.) Log Out" << endl;
+					<< "6.) Calculate Predicted Interest" << endl
+					<< "7.) Close Account" << endl
+					<< "8.) Log Out" << endl;
 					cin >> choiceStr2;
 					cin.ignore();
 					if (check_input(choiceStr2) == 0) {
@@ -1124,6 +1149,16 @@ int main(void){
 						break;
 						
 						case 6:
+							if(Account->getAcccountType() != 'S'){
+								cout << "Interest can only be calculated on Savings Accounts. Returning to User Menu." << endl << endl;
+								break;
+							}
+							else{
+								Account->Calc_Predicted_Interest();
+							}
+						break;
+						
+						case 7:
 						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
 						while(u==0){
 							choiceStr = ""; //reset values
@@ -1157,7 +1192,7 @@ int main(void){
 						}
 						break;
 						
-						case 7:
+						case 8:
 						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						z = 1;
