@@ -26,6 +26,7 @@ Frozen (Bool)
 work on switch statement choice input
 add pay bill for checking account only/ need to change transaction stuff to virtual for checking account
 add option to view calculated interest on savings account only
+work on create user stuff
 */
 
 #include <iostream>
@@ -173,6 +174,7 @@ Bank_Account::Bank_Account(){
 	cout << "Enter your userID:" << endl;
 	while(i == 0){
 		cin >> in;
+		//add error check here
 		userID = atol(in.c_str());
 		if(userID <= 0){
 			cout << "Invalid choice for Used ID please try agaiin" << endl;
