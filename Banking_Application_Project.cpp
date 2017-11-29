@@ -48,6 +48,9 @@ int check_input(string inStr) {
 	if(inStr.length() != 1) {
 		return 0;//invalid
 	}
+	if(atof(inStr.c_str()) == 0 || atof(inStr.c_str())>7){
+		return 0;
+	}
 	return 1;//valid
 }
 
@@ -791,6 +794,7 @@ int main(void){
 			if(b==1){
 				cout << "Welcome Manager!" << endl;
 				cout << "------------------------------------------------" << endl << endl;
+				a = 0;
 				while(a == 0){
 					cout << "What would you like to do?" << endl;
 					cout << "1.) Freeze Customer Account" << endl;
@@ -845,9 +849,9 @@ int main(void){
 						break;
 						//exit
 						case 5:
-						cout << "Closing Online Banking Inc. Thank you!" << endl;
+						cout << "Returning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
-						return 0;
+						a = 1;
 						break;
 						//invalid choice
 						default:
@@ -878,7 +882,7 @@ int main(void){
 				if(type == 'F'){
 					cout << "This account number does not exist." << endl;
 					cout << "If you would like to create this account please select 'Create Account' from the main menu" << endl;
-					return 0;
+					break;
 				}
 				//savings
 				else if(type == 'S'){
