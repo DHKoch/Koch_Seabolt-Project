@@ -3,35 +3,6 @@
 //ECE 3220: Software Design in C/C++
 //Final Project
 
-/*
-NOTICE:
-
-Please read the Banking App 1st release word document before running the demo
-The last paragraph in the document includes some instructions for running the program
-The Account Text files are also included in the zip file, these are necessary for the demo to run
-
-this current iteration only accepts the expected input type, this is ann issue we are working on
-
-The structure of the account text files is:
-
-Account type (Char)
-User Id (int)
-Account number (Long int)
-Account password (string)
-Balance (float)
-Frozen (Bool)
-*/
-
-/*
-add pay bill for checking account only/ need to change transaction stuff to virtual for checking account
-add option to view calculated interest on savings account only
-work on create user stuff
-*/
-
-//Fixed but could use more testing
-/*
-work on switch statement choice input
-*/
 
 #include <iostream>
 #include <fstream>
@@ -85,16 +56,22 @@ long check_num(string num){
 
 float check_rate(string rate){
 	float n = 0;
+	string in;
 	char choice;
 	n = atof(rate.c_str());
 	if(n==0){
 		cout << "If you are trying to change the rate to 0.00% please enter 'Y' if not enter 'N' to try again." << endl;
-		cin >> choice;
+		cin >> in;
 		cin.ignore();
-		if(choice == 'Y'){
+		if(strncmp(in.c_str(),"Y",1) == 0){   // strcmp, strncmp
 			return 0;
 		}
+		else if(strncmp(in.c_str(),"N",1) == 0){
+			cout << "Rate not changed. Returning to main menu." << endl << endl;
+			return -1;
+		}
 		else{
+			cout << "Invalid choice! Rate not changed. Returning to main menu." << endl << endl;
 			return -1;
 		}
 	}
@@ -181,26 +158,26 @@ Bank_Account::Bank_Account(){
 	int i = 0;
 	cout << "Thank you for making an account with Online Banking Inc." << endl;
 	cout << "First we need to gather some information from you" << endl;
-	cout << "What 8-digit acccount number would you like to have?" << endl;
+	cout << "What 8-digit acccount number would you like to have? Please enter without spaces." << endl;
 	while(i==0){
 		cin >> in;
 		Account_Num = check_num(in);
 		if(Account_Num > 99999999 || Account_Num == 0){
-			cout << "Invalid choice of Account Number! Must be 8-digits or less. Please try again:" << endl;
+			cout << "Invalid choice of Account Number! Must be a numbers and 8-digits or less. Please try again:" << endl;
 		}
 		else{
 			i = 1;
 		}
 	}
 	i = 0;
-	cout << "Enter your userID:" << endl;
+	cout << "Enter your userID. Please no spaces." << endl;
 	while(i == 0){
 		cin >> in;
-		//add error check here
+		
 		userID = atol(in.c_str());
 		if(userID <= 0){
 			cout << "Invalid choice for Used ID please try agaiin" << endl;
-			cout << "Enter a User ID: " << endl;
+			cout << "Enter a User ID that is a positive number without spaces. " << endl;
 		}
 		else{
 			i = 1;
@@ -221,7 +198,6 @@ Bank_Account::Bank_Account(long acct_num){
 
 	ifstream myfile;
 	char filename[30];
-	string in;
 	sprintf(filename,"%08li.txt",acct_num);
 	myfile.open(filename);
 	if(!myfile.is_open()){
@@ -391,30 +367,36 @@ void Bank_Account::close_Acct(){
 }
 
 void Bank_Account::transfer(long acct_num) {
-	Bank_Account transferee(acct_num);
-	if (!transferee.does_exist()) {//account doesn't exist
+	Bank_Account* temp;
+	try{
+		temp = new Bank_Account(acct_num);
+	}
+	catch(int i){
 		cout << "Account does not exist, transfer cancelled." << endl;
+		return;
+	}
+	if(temp->Account_Num == this->Account_Num){
+		cout << "Cannot transfer into current account" << endl;
 	}
 	else {
 		string amountStr;
 		double amount = 0;
-		cout << "How much would you like to transfer?" << endl;
+		cout << "How much would you like to transfer? Please enter value with no spaces. Cannot be $0.00" << endl;
 		getline(cin, amountStr);
 		sscanf(amountStr.c_str(), "%lf", &amount);
 		if (amount < 0) {
 			cout << "Amount cannot be negative." << endl;
 		}
+		else if(amount == 0){
+			cout << "Amount may not be 0 or an Invalid input. Please enter positive numbers only." << endl;
+		}
 		else if (amount > this->balance) {
 			cout << "Insufficient funds for transfer." << endl;
 		}
 		else {
-			transferee + amount;
+			*(temp) + amount;
 			this->operator-(amount);
-			/*transferee.balance += amount;
-			this->balance -= amount;
-			transferee.print_to_file();
-			this->print_to_file();*/
-			transferee.print_to_translog(amount, 'T');
+			temp->print_to_translog(amount, 'T');
 			this->print_to_translog((amount * -1), 'T');
 			cout << "Amount transferred successfully." << endl;
 		}
@@ -429,9 +411,7 @@ class Checking_Acct : public Bank_Account {
 	public:
 		Checking_Acct();
 		Checking_Acct(long acct_num);
-		void Calc_Predicted_Interest(){};
-		//void check_balance();
-		//pay bill function??????????
+		void Calc_Predicted_Interest(){}; //empty function
 };
 
 //set type to C
@@ -467,14 +447,14 @@ Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 Saving_Acct::Saving_Acct() : Bank_Account(){
 	Acct_Type = 'S';
 	this->Get_rate();
-	cout << "The Interest Rate set for this account is: " << Interest_Rate*100 << "%" << endl;
+	cout << "\nThe Interest Rate set for this account is: " << Interest_Rate*100 << "%" << endl;
 }
 
 //deposit to account
 void Saving_Acct::deposit() throw(int){
 	string amount;
 	double n = 0;
-	cout << "How much would you like to deposit?" << endl;
+	cout << "\nHow much would you like to deposit?" << endl;
 	cin >> amount;
 	cin.ignore();
 	n = atof(amount.c_str());
@@ -482,7 +462,7 @@ void Saving_Acct::deposit() throw(int){
 		throw 1;
 	}
 	this->operator+(n);
-	cout << "The new balance of account: " << Account_Num << " is: " << balance << endl;
+	cout << "\nThe new balance of account: " << Account_Num << " is: " << balance << endl;
 	//get new rate
 	this->Get_rate();
 	this->print_to_translog(n,'D');
@@ -492,7 +472,7 @@ void Saving_Acct::deposit() throw(int){
 void Saving_Acct::withdraw() throw(int,char){
 	string amount;
 	double n = 0;
-	cout << "How much would you like to withdraw?" << endl;
+	cout << "\nHow much would you like to withdraw?" << endl;
 	cin >> amount;
 	cin.ignore();
 	n = atof(amount.c_str());
@@ -514,7 +494,7 @@ void Saving_Acct::withdraw() throw(int,char){
 
 //print balance
 void Saving_Acct::check_balance(){
-	cout << "Your current balance is: $" << balance << endl;
+	cout << "\nYour current balance is: $" << balance << endl;
 	cout << "The Interest Rate of this account is:" << Interest_Rate*100 << "%" << endl;
 }
 
@@ -563,17 +543,17 @@ void Saving_Acct::Calc_Predicted_Interest(){
 	double temp;
 	string t;
 	long n;
-	cout << "For how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
+	cout << "\nFor how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
 	cin >> t;
 	cin.ignore();
 	n = check_num(t);
 	if(n == 0){
-		cout << "Invalid Input for years. Returning to User Menu." << endl << endl;
+		cout << "\nInvalid Input for years. Returning to User Menu." << endl << endl;
 		return;
 	}
 	//interest calculation
 	temp = balance* pow(1+Interest_Rate,n);
-	cout << "Your expected account balance after " << n << " years is: $" << temp << endl << endl;
+	cout << "\nYour expected account balance after " << n << " years is: $" << temp << endl << endl;
 }
 
 //class for managing accounts
@@ -600,7 +580,7 @@ Manager_Acct::Manager_Acct(){
 int Manager_Acct::manager_login(long acct_num){
 	string pass;
 	if(acct_num == empl_num){
-		cout << "please enter your password..." << endl;
+		cout << "Please enter your password." << endl;
 		getline(cin,pass);
 		if(pass_encrypt(pass) == password){
 			return 1;
@@ -656,7 +636,7 @@ void Manager_Acct::Current_Rates(){
 	int range;
 	vector<float>rates;
 	vector<int>ranges;
-	string filename = "Rates.txt", in;
+	string filename = "Rates.txt";
 	ifstream file;
 	file.open(filename);
 	if(!file.is_open()){
@@ -683,7 +663,7 @@ void Manager_Acct::Adjust_Rate(){
 	int i = 0;
 	float rate;
 	int range;
-	char choice;
+	int choice;
 	float temp;
 	vector<float>rates;
 	vector<int>ranges;
@@ -707,12 +687,18 @@ void Manager_Acct::Adjust_Rate(){
 	<< "2.) $5000-9999" << endl
 	<< "3.) $10000-99999" << endl
 	<< "4.) >$100000" << endl;
-	cin >> choice;
+	cin >> in;
 	cin.ignore();
+	if (check_input(in) == 0) {
+			choice = -1; //force to go to default
+		}
+		else {
+			sscanf(in.c_str(), "%d", &choice);
+		}
 	//go to selected range
 	switch(choice){
-		case '1':
-			cout << "Enter the new rate for accounts with a balance between $4999 - $1000:" << endl;
+		case 1:
+			cout << "Enter the new rate as a decimal for accounts with a balance between $4999 - $1000:" << endl;
 			cin >> in;
 			cin.ignore();
 			temp = check_rate(in);
@@ -721,8 +707,8 @@ void Manager_Acct::Adjust_Rate(){
 			rates[0] = temp;
 		break;
 		
-		case '2':
-			cout << "Enter the new rate for accounts with a balance between $5000 - $9999:" << endl;
+		case 2:
+			cout << "Enter the new rate as a decimal for accounts with a balance between $5000 - $9999:" << endl;
 			cin >> in;
 			cin.ignore();
 			temp = check_rate(in);
@@ -731,8 +717,8 @@ void Manager_Acct::Adjust_Rate(){
 			rates[1] = temp;
 		break;
 		
-		case '3':
-			cout << "Enter the new rate for accounts with a balance between $10000 - $99999:" << endl;
+		case 3:
+			cout << "Enter the new rate as a decimal for accounts with a balance between $10000 - $99999:" << endl;
 			cin >> in;
 			cin.ignore();
 			temp = check_rate(in);
@@ -741,8 +727,8 @@ void Manager_Acct::Adjust_Rate(){
 			rates[2] = temp;
 		break;
 		
-		case '4':
-			cout << "Enter the new rate for accounts with a balance above $100000:" << endl;
+		case 4:
+			cout << "Enter the new rate as a decimal for accounts with a balance above $100000:" << endl;
 			cin >> in;
 			cin.ignore();
 			temp = check_rate(in);
@@ -772,11 +758,11 @@ int main(void){
 	Manager_Acct M;
 	string acct_str, freeze_str;
 	long acct_num, freeze_num;
-	int a = 0, b = 0, c = 0, z = 0, u =0, choice = -1, choice2 = -1;
-	cout << "Welcome to Online Banking Inc." << endl;
+	int a = 0, b = 0, c = 0, z = 0, u =0, k = 0, choice = -1, choice2 = -1;
+	cout << "\nWelcome to Online Banking Inc." << endl;
 		cout << "------------------------------------------------" << endl << endl;
 	while(a == 0){
-		cout << "Please select an option to begin" << endl
+		cout << "\nPlease select an option to begin" << endl
 			<< "1.) Login as Manager" << endl
 			<< "2.) Login as Customer" << endl
 			<< "3.) Create New Customer Account" << endl
@@ -793,22 +779,22 @@ int main(void){
 		switch(choice){
 			//manager
 			case 1:
-			cout << "Welcome! Please enter your employee number, or enter -1 to cancel:" << endl;//attempt to login
+			cout << "\nWelcome! Please enter your employee number without spaces, or enter -1 to cancel:" << endl;//attempt to login
 			cin >> in;
 			cin.ignore();
 			acct_num = check_num(in);
 			if(acct_num == 0){
-				cout << "Account number not entered, returning to main menu." << endl;
+				cout << "\nAccount number not entered, returning to main menu." << endl;
 				break;
 			}
 			b = M.manager_login(acct_num);
 			//successful login
 			if(b==1){
-				cout << "Welcome Manager!" << endl;
+				cout << "\nWelcome Manager!" << endl;
 				cout << "------------------------------------------------" << endl << endl;
-				a = 0;
-				while(a == 0){
-					cout << "What would you like to do?" << endl;
+				k = 0;
+				while(k == 0){
+					cout << "\nWhat would you like to do?" << endl;
 					cout << "1.) Freeze Customer Account" << endl;
 					cout << "2.) Un-Freeze Customer Account" << endl;
 					cout << "3.) View Current Interest Rates" << endl;
@@ -827,11 +813,11 @@ int main(void){
 					switch(choice){
 						//freeze
 						case 1:
-						cout << "\nEnter the Account Number of the Account you would like to freeze:" << endl;
+						cout << "\nEnter the Account Number of the Account you would like to freeze without spaces, or enter -1 to cancel." << endl;
 						cin >> in;
 						freeze_num = check_num(in);
 						if(freeze_num == 0){
-							cout << "Invalid input for account number! Returning to manager menu." << endl;
+							cout << "\nInvalid input for account number! Returning to manager menu." << endl;
 							break;
 						}
 						
@@ -843,7 +829,7 @@ int main(void){
 						cin >> in;
 						freeze_num = check_num(in);
 						if(freeze_num == 0){
-							cout << "Invalid input for account number! Returning to manager menu." << endl;
+							cout << "\nInvalid input for account number! Returning to manager menu." << endl;
 							break;
 						}
 					
@@ -852,7 +838,7 @@ int main(void){
 						break;
 						//view interest rates
 						case 3:
-						cout << "Displaying the currect Interest rates..." << endl;
+						cout << "\nDisplaying the current Interest rates..." << endl;
 						M.Current_Rates();
 						break;
 						//adjust interest rates
@@ -861,13 +847,13 @@ int main(void){
 						break;
 						//exit
 						case 5:
-						cout << "Returning to main menu..." << endl;
+						cout << "\nReturning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
-						a = 1;
+						k = 1;
 						break;
 						//invalid choice
 						default:
-						cout << "Invalid choice! Please try again" << endl;
+						cout << "\nInvalid choice! Please try again" << endl;
 						break;
 					}
 				}
@@ -875,25 +861,25 @@ int main(void){
 			}
 			//login unsuccessful
 			else{
-				cout << "Login failed...." << endl;
-				cout << "Please try again." << endl;
+				cout << "\nLogin failed...." << endl;
+				cout << "\nPlease try again." << endl;
 			}
 			break;
 			//existing user
 			case 2:
-				cout << "Welcome User! Please enter your Account Number, or enter -1 to cancel:" << endl;//attempt to login, need to add password check still
+				cout << "\nWelcome User! Please enter your Account Number, or enter -1 to cancel:" << endl;//attempt to login, need to add password check still
 				cin >> in;
 				cin.ignore();
 				acct_num = check_num(in);
 				if(acct_num == 0){
-					cout << "Account number not entered, returning to main menu." << endl << endl;
+					cout << "\nAccount number not entered, returning to main menu." << endl << endl;
 					break;
 				}
 				type = user_acct(acct_num);
 				//account is closed
 				if(type == 'F'){
-					cout << "This account number does not exist." << endl;
-					cout << "If you would like to create this account please select 'Create Account' from the main menu" << endl;
+					cout << "\nThis account number does not exist." << endl;
+					cout << "\nIf you would like to create this account please select 'Create Account' from the main menu" << endl;
 					break;
 				}
 				//savings
@@ -903,13 +889,14 @@ int main(void){
 						Account->check_password();
 					}
 					catch(int){
-						cout << "Incorrect Password for account! Returning to main menu." << endl << endl;
+						cout << "\nIncorrect Password for account! Returning to main menu." << endl << endl;
 						break;
 					}
 					
 					if(Account->frozen == 1){
-						cout << "This account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
-						cout << "Returing to main menu" << endl;
+						cout << "\nThis account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
+						cout << "\nReturing to main menu" << endl;
+						cout << "------------------------------------------------" << endl << endl;
 						break;
 					}
 				}
@@ -920,22 +907,22 @@ int main(void){
 						Account->check_password();
 					}
 					catch(int){
-						cout << "Incorrect Password for account! Returning to main menu." << endl << endl;
+						cout << "\nIncorrect Password for account! Returning to main menu." << endl << endl;
 						break;
 					}
 				
 					catch(char t){
-						cout << "This account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
-						cout << "Returing to main menu" << endl;
+						cout << "\nThis account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
+						cout << "\nReturing to main menu" << endl;
 						break;
 					}
 				}
 				//add menu for user here and switch statement
-				cout << "Login Successful!" << endl;
+				cout << "\nLogin Successful!" << endl;
 				cout << "------------------------------------------------" << endl << endl;
 				z = 0;
 				while(z == 0){
-					cout << "What would you like to do? Please select one of the following options:" << endl;
+					cout << "\nWhat would you like to do? Please select one of the following options:" << endl;
 					cout << "1.) View Account Balance" << endl
 					<< "2.) Deposit into Account" << endl
 					<< "3.) Withdraw from Account" << endl
@@ -963,7 +950,7 @@ int main(void){
 							Account->deposit();
 						}
 						catch(int e){
-							cout << "Invalid value for amount to deposit into account! Returning to User menu." << endl << endl;
+							cout << "\nInvalid value for amount to deposit into account! Returning to User menu." << endl << endl;
 						}
 						break;
 						//withdraw
@@ -972,17 +959,21 @@ int main(void){
 							Account->withdraw();
 						}
 						catch(int e){
-							cout << "Invalid value for amount to withdraw from account! Returning to User menu." << endl << endl;
+							cout << "\nInvalid value for amount to withdraw from account! Returning to User menu." << endl << endl;
 						}
 						catch(char q){
-							cout << "Insuficient funds for withdraw! Please try again" << endl << endl;
+							cout << "\nInsuficient funds for withdraw! Please try again" << endl << endl;
 						}
 						break;
 						//transfer
 						case 4:
-							cout << "What is the account number you would like to transfer to?" << endl;
+							cout << "\nWhat is the account number you would like to transfer to?" << endl;
 							getline(cin, acct_str);
-							sscanf(acct_str.c_str(), "%ld", &acct_num);
+							acct_num = check_num(acct_str);
+							if(acct_num == 0){
+								cout << "\nInvalid input for account number! Returning to User Menu." << endl;
+								break;
+							}
 							Account->transfer(acct_num);
 						break;
 						//transaction log
@@ -991,14 +982,15 @@ int main(void){
 								Account->print_translog();
 							}
 							catch(int){
-								cout << "Returning to user menu." << endl;
-								
+								cout << "\nReturning to user menu." << endl;
+								cout << "------------------------------------------------" << endl << endl;
 							}
 						break;
 						
 						case 6:
 							if(Account->getAcccountType() != 'S'){
-								cout << "Interest can only be calculated on Savings Accounts. Returning to User Menu." << endl << endl;
+								cout << "\nInterest can only be calculated on Savings Accounts. Returning to User Menu." << endl;
+								cout << "------------------------------------------------" << endl << endl;
 								break;
 							}
 							else{
@@ -1023,33 +1015,33 @@ int main(void){
 							}
 							switch(choice){
 								case 1:
-									cout << "Closing account..." << endl;
+									cout << "\nClosing account..." << endl;
 									Account->close_Acct();
-									cout << "Closing Online Banking Inc. Thank you!" << endl;
+									cout << "\nClosing Online Banking Inc. Thank you!" << endl;
 									cout << "------------------------------------------------" << endl << endl;
 									return 0;
 								break;
 							
 								case 2:
-									cout << "Account not closed. Returning to User menu." << endl;
+									cout << "\nAccount not closed. Returning to User menu." << endl;
 									u = 1;
 								break;
 								
 								default:
-									cout << "Incorrect choice please try again." << endl;
+									cout << "\nIncorrect choice please try again." << endl;
 								break;
 							}
 						}
 						break;
 						//exit
 						case 8:
-						cout << "Returning to main menu..." << endl;
+						cout << "\nReturning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						z = 1;
 						break;
 						//default
 						default:
-						cout << "Invalid Choice! Please try again" << endl;
+						cout << "\nInvalid Choice! Please try again" << endl;
 						break;
 					}
 				}
@@ -1057,10 +1049,10 @@ int main(void){
 			break;
 			//new user
 			case 3:
-			cout << "Welcome!" << endl;
+			cout << "\nWelcome!" << endl;
 			cout << "------------------------------------------------" << endl << endl;
 			cout << "To create your account we need to gather some information from you" << endl;
-			cout << "What type of Account woudl you like to open? Savings or Checking?" << endl;
+			cout << "\nWhat type of Account woudl you like to open? Savings or Checking?" << endl;
 			while(c == 0){
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
 				cin >> type_choice;
@@ -1077,7 +1069,7 @@ int main(void){
 					break;
 					
 					default:
-					cout << "Invalid choice! Please Try again" << endl;
+					cout << "\nInvalid choice! Please Try again" << endl;
 					break;
 				}
 			}
@@ -1085,8 +1077,7 @@ int main(void){
 			Account->print_to_file();
 			z = 0;
 			while(z == 0){
-				//same choices as existing user, could make this a function to cut down on code
-					cout << "What would you like to do? Please select one of the following options:" << endl;
+					cout << "\nWhat would you like to do? Please select one of the following options:" << endl;
 					cout << "1.) View Account Balance" << endl
 					<< "2.) Deposit into Account" << endl
 					<< "3.) Withdraw from Account" << endl
@@ -1104,53 +1095,57 @@ int main(void){
 						sscanf(choiceStr2.c_str(), "%d", &choice2);
 					}
 					switch(choice2){
+						//check balance
 						case 1:
 						Account->check_balance();
 						break;
-						
 						//deposit
 						case 2:
 						try{
 							Account->deposit();
 						}
 						catch(int e){
-							cout << "Invalid value for amount to deposit into account! Returning to User menu." << endl << endl;
+							cout << "\nInvalid value for amount to deposit into account! Returning to User menu." << endl << endl;
 						}
 						break;
-						
 						//withdraw
 						case 3:
 						try{
 							Account->withdraw();
 						}
 						catch(int e){
-							cout << "Invalid value for amount to withdraw from account! Returning to User menu." << endl << endl;
+							cout << "\nInvalid value for amount to withdraw from account! Returning to User menu." << endl << endl;
 						}
 						catch(char q){
-							cout << "Insuficient funds for withdraw! Please try again" << endl << endl;
+							cout << "\nInsuficient funds for withdraw! Please try again" << endl << endl;
 						}
 						break;
-						
+						//transfer
 						case 4:
-							cout << "What is the account number you would like to transfer to?" << endl;
+							cout << "\nWhat is the account number you would like to transfer to?" << endl;
 							getline(cin, acct_str);
-							sscanf(acct_str.c_str(), "%ld", &acct_num);
+							acct_num = check_num(acct_str);
+							if(acct_num == 0){
+								cout << "\nInvalid input for account number! Returning to User Menu." << endl;
+								break;
+							}
 							Account->transfer(acct_num);
 						break;
-						
+						//transaction log
 						case 5:
 							try{
 								Account->print_translog();
 							}
 							catch(int){
-								cout << "Returning to user menu." << endl;
-								
+								cout << "\nReturning to user menu." << endl;
+								cout << "------------------------------------------------" << endl << endl;
 							}
 						break;
 						
 						case 6:
 							if(Account->getAcccountType() != 'S'){
-								cout << "Interest can only be calculated on Savings Accounts. Returning to User Menu." << endl << endl;
+								cout << "\nInterest can only be calculated on Savings Accounts. Returning to User Menu." << endl;
+								cout << "------------------------------------------------" << endl << endl;
 								break;
 							}
 							else{
@@ -1158,10 +1153,12 @@ int main(void){
 							}
 						break;
 						
+						//close account
 						case 7:
-						cout << "\nAre you sure you would like to close your account? Enter 'Y' for yes or 'N' for no." << endl;
+						cout << "\nAre you sure you would like to close your account? Enter '1' for yes or '2' for no." << endl;
+						u = 0;
 						while(u==0){
-							choiceStr = ""; //reset values
+							choiceStr = ""; //reset values 
 							choice = -1;
 							cin >> choiceStr;
 							cin.ignore();
@@ -1172,32 +1169,35 @@ int main(void){
 								sscanf(choiceStr.c_str(), "%d", &choice);
 							}
 							switch(choice){
-								case 'Y':
-									cout << "Closing account..." << endl;
+								case 1:
+									cout << "\nClosing account..." << endl;
 									Account->close_Acct();
-									cout << "Closing Online Banking Inc. Thank you!" << endl;
+									cout << "\nClosing Online Banking Inc. Thank you!" << endl;
 									cout << "------------------------------------------------" << endl << endl;
 									return 0;
 								break;
 							
-								case 'N':
-									cout << "Account not closed. Returning to User menu." << endl;
-									u=1;
+								case 2:
+									cout << "\nAccount not closed. Returning to User menu." << endl;
+									u = 1;
 								break;
 								
 								default:
-									cout << "Incorrect choice please try again." << endl;
+									cout << "\nIncorrect choice please try again." << endl;
 								break;
 							}
 						}
 						break;
-						
+						//exit
 						case 8:
-						cout << "Returning to main menu..." << endl;
+						cout << "\nReturning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						z = 1;
 						break;
-						
+						//default
+						default:
+						cout << "\nInvalid Choice! Please try again" << endl;
+						break;
 					}
 				}
 			break;
