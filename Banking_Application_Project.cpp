@@ -154,7 +154,10 @@ char Bank_Account::getAcccountType(){
 
 //gets account number, userID, password from user, creates account
 Bank_Account::Bank_Account(){
+	
 	string in;
+	ifstream myfile;
+	char filename[30];
 	int i = 0;
 	cout << "Thank you for making an account with Online Banking Inc." << endl;
 	cout << "First we need to gather some information from you" << endl;
@@ -162,10 +165,17 @@ Bank_Account::Bank_Account(){
 	while(i==0){
 		cin >> in;
 		Account_Num = check_num(in);
+		sprintf(filename,"%08li.txt",Account_Num);
+		myfile.open(filename);
 		if(Account_Num > 99999999 || Account_Num == 0){
 			cout << "Invalid choice of Account Number! Must be a numbers and 8-digits or less. Please try again:" << endl;
 		}
+		else if(myfile.is_open()){
+			cout << "This Account already exists. If you would like to login to this account please select the 'Login as Customer' option from the main menu" << endl;
+			throw 1;
+		}
 		else{
+			myfile.close();
 			i = 1;
 		}
 	}
@@ -1053,18 +1063,31 @@ int main(void){
 			cout << "------------------------------------------------" << endl << endl;
 			cout << "To create your account we need to gather some information from you" << endl;
 			cout << "\nWhat type of Account woudl you like to open? Savings or Checking?" << endl;
+			c=0;
 			while(c == 0){
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
 				cin >> type_choice;
 				cin.ignore();
 				switch(type_choice){
 					case 'S':
-					Account = new Saving_Acct();
+					try{
+						Account = new Saving_Acct();
+					}
+					catch(int i){
+						c=2;
+						break;
+					}
 					c = 1;
 					break;
 					
 					case 'C':
-					Account = new Checking_Acct();
+					try{
+						Account = new Checking_Acct();
+					}
+					catch(int i){
+						c=2;
+						break;
+					}
 					c = 1;
 					break;
 					
@@ -1072,6 +1095,11 @@ int main(void){
 					cout << "\nInvalid choice! Please Try again" << endl;
 					break;
 				}
+			}
+			if(c==2){
+				cout << "\nReturning to Main Menu" << endl; 
+				cout << "------------------------------------------------" << endl << endl;
+				break;
 			}
 			//create file
 			Account->print_to_file();
