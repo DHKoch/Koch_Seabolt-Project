@@ -54,6 +54,7 @@ long check_num(string num){
 	}
 }
 
+
 float check_rate(string rate){
 	float n = 0;
 	string in;
@@ -61,8 +62,7 @@ float check_rate(string rate){
 	n = atof(rate.c_str());
 	if(n==0){
 		cout << "If you are trying to change the rate to 0.00% please enter 'Y' if not enter 'N' to try again." << endl;
-		cin >> in;
-		cin.ignore();
+		getline(cin,in);
 		if(strncmp(in.c_str(),"Y",1) == 0){   // strcmp, strncmp
 			return 0;
 		}
@@ -168,7 +168,7 @@ Bank_Account::Bank_Account(){
 	cout << "First we need to gather some information from you" << endl;
 	cout << "What 8-digit acccount number would you like to have? Please enter without spaces." << endl;
 	while(i==0){
-		cin >> in;
+		getline(cin,in);
 		Account_Num = check_num(in);
 		sprintf(filename,"%08li.txt",Account_Num);
 		myfile.open(filename);
@@ -187,7 +187,7 @@ Bank_Account::Bank_Account(){
 	i = 0;
 	cout << "Enter your userID. Please no spaces." << endl;
 	while(i == 0){
-		cin >> in;
+		getline(cin,in);
 		
 		userID = atol(in.c_str());
 		if(userID <= 0){
@@ -199,8 +199,7 @@ Bank_Account::Bank_Account(){
 		}
 	}
 	cout << "Enter your password you would like to have for this account:" << endl;
-	cin >> password;
-	cin.ignore();
+	getline(cin,password);
 	
 	frozen = 0;
 	cout << "Your starting balance will be $1000!" << endl;
@@ -233,8 +232,7 @@ Bank_Account::Bank_Account(long acct_num){
 void Bank_Account::check_password() throw(int){
 	string in;
 	cout << "Please enter the password for this account: ";
-	cin >> in;
-	cin.ignore();
+	getline(cin,in);
 	if(in != password){
 		throw 1;
 	}
@@ -335,8 +333,7 @@ void Bank_Account::deposit() throw(int){
 	string amount;
 	double n = 0;
 	cout << "How much would you like to deposit?" << endl;
-	cin >> amount;
-	cin.ignore();
+	getline(cin,amount);
 	n = atof(amount.c_str());
 	if(n <= 0){
 		throw 1;
@@ -353,8 +350,7 @@ void Bank_Account::withdraw() throw(int,char){
 	double n = 0;
 	string amount;
 	cout << "How much would you like to withdraw?" << endl;
-	cin >> amount;
-	cin.ignore();
+	getline(cin,amount);
 	n = atof(amount.c_str());
 	if(n <= 0){
 		throw 1;
@@ -471,8 +467,7 @@ void Saving_Acct::deposit() throw(int){
 	string amount;
 	double n = 0;
 	cout << "\nHow much would you like to deposit?" << endl;
-	cin >> amount;
-	cin.ignore();
+	getline(cin,amount);
 	n = atof(amount.c_str());
 	if(n <= 0){
 		throw 1;
@@ -489,8 +484,7 @@ void Saving_Acct::withdraw() throw(int,char){
 	string amount;
 	double n = 0;
 	cout << "\nHow much would you like to withdraw?" << endl;
-	cin >> amount;
-	cin.ignore();
+	getline(cin,amount);
 	n = atof(amount.c_str());
 	if(n <= 0){
 		throw 1;
@@ -598,8 +592,7 @@ void Saving_Acct::Calc_Predicted_Interest(){
 	string t;
 	long n;
 	cout << "\nFor how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
-	cin >> t;
-	cin.ignore();
+	getline(cin,t);
 	n = check_num(t);
 	if(n == 0){
 		cout << "\nInvalid Input for years. Returning to User Menu." << endl << endl;
@@ -741,8 +734,7 @@ void Manager_Acct::Adjust_Rate(){
 	<< "2.) $5000-9999" << endl
 	<< "3.) $10000-99999" << endl
 	<< "4.) >$100000" << endl;
-	cin >> in;
-	cin.ignore();
+	getline(cin,in);
 	if (check_input(in) == 0) {
 			choice = -1; //force to go to default
 		}
@@ -753,8 +745,7 @@ void Manager_Acct::Adjust_Rate(){
 	switch(choice){
 		case 1:
 			cout << "Enter the new rate as a decimal for accounts with a balance between $4999 - $1000:" << endl;
-			cin >> in;
-			cin.ignore();
+			getline(cin,in);
 			temp = check_rate(in);
 			if(temp == -1)
 				break;
@@ -763,8 +754,7 @@ void Manager_Acct::Adjust_Rate(){
 		
 		case 2:
 			cout << "Enter the new rate as a decimal for accounts with a balance between $5000 - $9999:" << endl;
-			cin >> in;
-			cin.ignore();
+			getline(cin,in);
 			temp = check_rate(in);
 			if(temp == -1)
 				break;
@@ -773,8 +763,7 @@ void Manager_Acct::Adjust_Rate(){
 		
 		case 3:
 			cout << "Enter the new rate as a decimal for accounts with a balance between $10000 - $99999:" << endl;
-			cin >> in;
-			cin.ignore();
+			getline(cin,in);
 			temp = check_rate(in);
 			if(temp == -1)
 				break;
@@ -783,8 +772,7 @@ void Manager_Acct::Adjust_Rate(){
 		
 		case 4:
 			cout << "Enter the new rate as a decimal for accounts with a balance above $100000:" << endl;
-			cin >> in;
-			cin.ignore();
+			getline(cin,in);
 			temp = check_rate(in);
 			if(temp == -1)
 				break;
@@ -821,8 +809,7 @@ int main(void){
 			<< "2.) Login as Customer" << endl
 			<< "3.) Create New Customer Account" << endl
 			<< "4.) Exit Program" << endl;
-		cin >> choiceStr;
-		cin.ignore();
+		getline(cin,choiceStr);
 		if (check_input(choiceStr) == 0) {
 			choice = -1; //force to go to default
 		}
@@ -834,8 +821,7 @@ int main(void){
 			//manager
 			case 1:
 			cout << "\nWelcome! Please enter your employee number without spaces, or enter -1 to cancel:" << endl;//attempt to login
-			cin >> in;
-			cin.ignore();
+			getline(cin,in);
 			acct_num = check_num(in);
 			if(acct_num == 0){
 				cout << "\nAccount number not entered, returning to main menu." << endl;
@@ -856,8 +842,7 @@ int main(void){
 					cout << "5.) Log Out" << endl;
 					choiceStr = ""; //reset values
 					choice = -1;
-					cin >> choiceStr;
-					cin.ignore();
+					getline(cin,choiceStr);
 					if (check_input(choiceStr) == 0) {
 						choice = -1; //-1 will go to default in the switch
 					}
@@ -868,7 +853,7 @@ int main(void){
 						//freeze
 						case 1:
 						cout << "\nEnter the Account Number of the Account you would like to freeze without spaces, or enter -1 to cancel." << endl;
-						cin >> in;
+						getline(cin,in);
 						freeze_num = check_num(in);
 						if(freeze_num == 0){
 							cout << "\nInvalid input for account number! Returning to manager menu." << endl;
@@ -880,7 +865,7 @@ int main(void){
 						//unfreeze
 						case 2:
 						cout << "\nEnter the Account Number of the Account you would like to unfreeze:" << endl;
-						cin >> in;
+						getline(cin,in);
 						freeze_num = check_num(in);
 						if(freeze_num == 0){
 							cout << "\nInvalid input for account number! Returning to manager menu." << endl;
@@ -922,8 +907,7 @@ int main(void){
 			//existing user
 			case 2:
 				cout << "\nWelcome User! Please enter your Account Number, or enter -1 to cancel:" << endl;//attempt to login, need to add password check still
-				cin >> in;
-				cin.ignore();
+				getline(cin,in);
 				acct_num = check_num(in);
 				if(acct_num == 0){
 					cout << "\nAccount number not entered, returning to main menu." << endl << endl;
@@ -985,8 +969,7 @@ int main(void){
 					<< "6.) Calculate Predicted Interest" << endl
 					<< "7.) Close Account" << endl
 					<< "8.) Log Out" << endl;
-					cin >> choiceStr2;
-					cin.ignore();
+					getline(cin,choiceStr2);
 					if (check_input(choiceStr2) == 0) {
 						choice2 = -1; //force to go to default
 					}
@@ -1059,8 +1042,7 @@ int main(void){
 						while(u==0){
 							choiceStr = ""; //reset values 
 							choice = -1;
-							cin >> choiceStr;
-							cin.ignore();
+							getline(cin,choiceStr);
 							if (check_input(choiceStr) == 0) {
 								choice = -1; //force to go to default
 							}
@@ -1109,9 +1091,11 @@ int main(void){
 			cout << "\nWhat type of Account woudl you like to open? Savings or Checking?" << endl;
 			c=0;
 			while(c == 0){
+				in = "";
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
-				cin >> type_choice;
-				cin.ignore();
+				getline(cin, in);
+				type_choice = in.at(0);
+				
 				switch(type_choice){
 					case 'S':
 					try{
@@ -1158,8 +1142,7 @@ int main(void){
 					<< "6.) Calculate Predicted Interest" << endl
 					<< "7.) Close Account" << endl
 					<< "8.) Log Out" << endl;
-					cin >> choiceStr2;
-					cin.ignore();
+					getline(cin,choiceStr2);
 					if (check_input(choiceStr2) == 0) {
 						choice2 = -1; //force to go to default
 					}
@@ -1232,8 +1215,7 @@ int main(void){
 						while(u==0){
 							choiceStr = ""; //reset values 
 							choice = -1;
-							cin >> choiceStr;
-							cin.ignore();
+							getline(cin,choiceStr);
 							if (check_input(choiceStr) == 0) {
 								choice = -1; //force to go to default
 							}
