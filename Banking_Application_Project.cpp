@@ -131,7 +131,7 @@ class Bank_Account {
 		int does_exist();
 		void print_to_translog(double value, char type);
 		void print_translog();
-		void transfer(long acct_num);
+		virtual void transfer(long acct_num);
 		char getAcccountType();
 		void operator+(double amt);
 		void operator-(double amt);
@@ -446,6 +446,7 @@ class Saving_Acct : public Bank_Account {
 		void check_balance();
 		void Calc_Predicted_Interest();
 		void Get_rate();
+		virtual void transfer(long acct_num);
 };
 
 //sets rate
@@ -500,6 +501,44 @@ void Saving_Acct::withdraw() throw(int,char){
 		throw 'a';
 	}
 	
+}
+
+void Saving_Acct::transfer(long acct_num){
+	Bank_Account* temp;
+	try{
+		temp = new Bank_Account(acct_num);
+	}
+	catch(int i){
+		cout << "Account does not exist, transfer cancelled." << endl;
+		return;
+	}
+	if(temp->Account_Num == this->Account_Num){
+		cout << "Cannot transfer into current account" << endl;
+	}
+	else {
+		string amountStr;
+		double amount = 0;
+		cout << "How much would you like to transfer? Please enter value with no spaces. Cannot be $0.00" << endl;
+		getline(cin, amountStr);
+		sscanf(amountStr.c_str(), "%lf", &amount);
+		if (amount < 0) {
+			cout << "Amount cannot be negative." << endl;
+		}
+		else if(amount == 0){
+			cout << "Amount may not be 0 or an Invalid input. Please enter positive numbers only." << endl;
+		}
+		else if (amount > this->balance) {
+			cout << "Insufficient funds for transfer." << endl;
+		}
+		else {
+			*(temp) + amount;
+			this->operator-(amount);
+			temp->print_to_translog(amount, 'T');
+			this->print_to_translog((amount * -1), 'T');
+			cout << "Amount transferred successfully." << endl;
+		}
+	}
+	this->Get_rate();
 }
 
 //print balance
@@ -921,7 +960,7 @@ int main(void){
 						break;
 					}
 				
-					catch(char t){
+					if(Account->frozen == 1){
 						cout << "\nThis account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
 						cout << "\nReturing to main menu" << endl;
 						break;
