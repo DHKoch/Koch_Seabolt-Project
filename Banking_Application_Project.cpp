@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <cmath>
+#include <algorithm>
 
 using namespace std;
 
@@ -25,41 +26,45 @@ int check_input(string inStr) {
 	return 1;//valid
 }
 
-//returns type of account
+//returns type of account, or F if the file fails to open
 char user_acct(long acct_num){
-	char temp;
+	char type;
 	ifstream myfile;
 	string in;
 	char filename[30];
 	int n = sprintf(filename,"%08li.txt",acct_num);
 	myfile.open(filename);
+	//file failed to open
 	if(!myfile.is_open()){
 		return 'F';
 	}
+	//file opened, get account type from file and return it
 	else{
-		myfile >> temp;
+		myfile >> type;
 		myfile.close();
-		return temp;
+		return type;
 	}
 }
 
+//makes sure string is a number and non negative
 long check_num(string num){
 	long n = 0;
 	n = atol(num.c_str());
-	if(n<=0){
+	if(n<=0){ //in case of an invalid number or non-number, use zero as a default value
 		return 0;
 	}
-	else{
+	else{ //otherwise, return the numerical value of the string
 		return n;
 	}
 }
 
-
+//makes sure the rate entered is valid
 float check_rate(string rate){
 	float n = 0;
 	string in;
 	char choice;
 	n = atof(rate.c_str());
+	//double checks that the user wants to set the rate to 0%
 	if(n==0){
 		cout << "If you are trying to change the rate to 0.00% please enter 'Y' if not enter 'N' to try again." << endl;
 		getline(cin,in);
@@ -75,10 +80,12 @@ float check_rate(string rate){
 			return -1;
 		}
 	}
+	//handles negative rates
 	else if(n<0){
 		cout << "Rate cannot be negative please try again!" << endl;
 		return -1;
 	}
+	//does not require futher action from user if rate is positive
 	else{
 		return n;
 	}
@@ -107,7 +114,7 @@ string pass_encrypt(string password) {
 	return password;
 }
 
-//ABC base class
+//ABC
 class Bank_Account {
 	private:
 		
@@ -139,27 +146,30 @@ class Bank_Account {
 		long get_num();
 };
 
+//used to quickly add to an accounts balance. useful in deposit/transfer
 void Bank_Account::operator+(double amt) {
 	balance += amt;
-	this->print_to_file();
+	this->print_to_file(); //updates accounts file after operation
 }
 
+//used to quickly subtract from an accounts balance. useful in withdraw/transfer
 void Bank_Account::operator-(double amt) {
 	balance -= amt;
-	this->print_to_file();
+	this->print_to_file();//updates account's file after operation
 }
 
+//getter for private member Acct_Type
 char Bank_Account::getAcccountType(){
 	return Acct_Type;
 }
 
+//getter for private member Account_Num
 long Bank_Account::get_num(){
 	return Account_Num;
 }
 
 //gets account number, userID, password from user, creates account
 Bank_Account::Bank_Account(){
-	
 	string in;
 	ifstream myfile;
 	char filename[30];
@@ -171,36 +181,55 @@ Bank_Account::Bank_Account(){
 		getline(cin,in);
 		Account_Num = check_num(in);
 		sprintf(filename,"%08li.txt",Account_Num);
+		//try to open file to see if it already exists
 		myfile.open(filename);
+		//makes sure Account_Num is in acceptable range
 		if(Account_Num > 99999999 || Account_Num == 0){
 			cout << "Invalid choice of Account Number! Must be a numbers and 8-digits or less. Please try again:" << endl;
 		}
+		//if file opens, then account already exists
 		else if(myfile.is_open()){
 			cout << "This Account already exists. If you would like to login to this account please select the 'Login as Customer' option from the main menu" << endl;
 			throw 1;
 		}
+		//account can be created
 		else{
 			myfile.close();
-			i = 1;
+			i = 1;//exit loop
 		}
 	}
 	i = 0;
 	cout << "Enter your userID. Please no spaces." << endl;
 	while(i == 0){
+		//get user id
 		getline(cin,in);
-		
 		userID = atol(in.c_str());
+		//make sure id is positive
 		if(userID <= 0){
-			cout << "Invalid choice for Used ID please try agaiin" << endl;
+			cout << "Invalid choice for Used ID please try again" << endl;
 			cout << "Enter a User ID that is a positive number without spaces. " << endl;
 		}
 		else{
 			i = 1;
 		}
 	}
+	//get password
 	cout << "Enter your password you would like to have for this account:" << endl;
 	getline(cin,password);
-	
+	i = 0;
+	while (i == 0) {
+		//if password is empty or all spaces, request a different one
+		string temp = password;
+		temp.erase(remove(temp.begin(), temp.end(), ' '), temp.end());
+		if (temp == "") {
+			cout << "Password cannot be empty. Please enter a valid password." << endl;
+			getline(cin, password);
+		}
+		else {
+			i = 1;
+		}
+	}
+
 	frozen = 0;
 	cout << "Your starting balance will be $1000!" << endl;
 	balance = 1000.00;
@@ -209,16 +238,16 @@ Bank_Account::Bank_Account(){
 
 //if account exists, gets info from its file
 Bank_Account::Bank_Account(long acct_num){
-
 	ifstream myfile;
 	char filename[30];
 	sprintf(filename,"%08li.txt",acct_num);
 	myfile.open(filename);
-	if(!myfile.is_open()){
+	if(!myfile.is_open()){ //account doesn't exist
 		cout << "This Account does not exist." << endl;
 		throw 1;
 		
 	}
+	//write info to file
 	myfile >> Acct_Type;
 	myfile >> userID;
 	myfile >> Account_Num;
@@ -229,6 +258,7 @@ Bank_Account::Bank_Account(long acct_num){
 	
 }
 
+//make sure password entered is correct, throw an exception if it is not
 void Bank_Account::check_password() throw(int){
 	string in;
 	cout << "Please enter the password for this account: ";
@@ -243,7 +273,7 @@ void Bank_Account::check_balance(){
 	cout << "Your current baland is: $" << balance << endl;
 }
 
-//writes new data to file
+//writes new data to file. is only called after an account's file has already been opened, so making sure the file opened in this function is not needed
 void Bank_Account::print_to_file(){
 	char filename[30];
 	ofstream myfile;
@@ -264,6 +294,7 @@ void Bank_Account::print_to_file(){
 	myfile.close();
 }
 
+//writes new transaction's info to account's transaction log
 void Bank_Account::print_to_translog(double value, char type){
 	
 	char filename[30];
@@ -271,6 +302,7 @@ void Bank_Account::print_to_translog(double value, char type){
 	sprintf(filename,"%08li_translog.txt",Account_Num);
 	myfile.open(filename,ios::out | ios::app);
 	
+	//deposit
 	if(type == 'D'){
 		myfile << "Transaction Type: Deposit" << "  ";
 		myfile << "Amount Deposited: " << value << "  ";
@@ -279,6 +311,7 @@ void Bank_Account::print_to_translog(double value, char type){
 		myfile << char(13) << char(10);
 	}
 	
+	//withdrawal
 	if(type == 'W'){
 		myfile << "Transaction Type: Withdraw" << "  ";
 		myfile << "Amount Withdrawn: " << value << "  ";
@@ -287,6 +320,7 @@ void Bank_Account::print_to_translog(double value, char type){
 		myfile << char(13) << char(10);
 	}
 	
+	//transfer
 	if(type == 'T'){
 		myfile << "Transaction Type: Transfer" << "  ";
 		myfile << "Amount Transferred: " << value << "  ";
@@ -297,30 +331,32 @@ void Bank_Account::print_to_translog(double value, char type){
 	myfile.close();
 }
 
+//displays transaction log to user
 void Bank_Account::print_translog(){
 	ifstream myfile;
 	char filename[30];
 	string in;
 	sprintf(filename,"%08li_translog.txt",Account_Num);
 	myfile.open(filename);
+	//file didnt open, account doesnt have a log yet
 	if(!myfile.is_open()){
 		cout << "This Account does not have a transaction log yet." << endl;
 		throw 1;
-	}
+	} //file opened, but log is empty
 	if ( myfile.peek() == std::ifstream::traits_type::eof() ){
 		cout << "This Account does not have a transaction log yet." << endl;
 		throw 1;
-	}
+	}//file is not empty, print it line by line
 	while(getline(myfile,in)){
 		cout << in << endl;
 	}
 }
 
-//checks if account exists
+//checks if account exists, returns 1 if it does returns 0 if not
 int Bank_Account::does_exist(){
 	
 	if(userID == 0){
-		//account does not exist
+		//userID is still default value, so account does not exist
 		return 0;
 	}
 	else{
@@ -335,10 +371,11 @@ void Bank_Account::deposit() throw(int){
 	cout << "How much would you like to deposit?" << endl;
 	getline(cin,amount);
 	n = atof(amount.c_str());
+	//have to deposit a positive value
 	if(n <= 0){
 		throw 1;
 	}
-	
+	//call addition operator
 	this->operator+(n);
 	cout << "The new balance of account - " << Account_Num << "is: $" << balance << endl;
 	//updates file with new balance
@@ -352,6 +389,7 @@ void Bank_Account::withdraw() throw(int,char){
 	cout << "How much would you like to withdraw?" << endl;
 	getline(cin,amount);
 	n = atof(amount.c_str());
+	//have to withdraw a positive value
 	if(n <= 0){
 		throw 1;
 	}
@@ -359,7 +397,7 @@ void Bank_Account::withdraw() throw(int,char){
 		this->operator-(n);
 		cout << "$" << amount << " withdrawn from account successfully";
 	}
-	else {
+	else {//throw exception if overdrawn
 		throw 'a';
 	}
 	//updates file with new balance
@@ -377,16 +415,17 @@ void Bank_Account::close_Acct(){
 	this->print_to_file();
 }
 
+//transfer money between accounts
 void Bank_Account::transfer(long acct_num) {
 	Bank_Account* temp;
 	try{
 		temp = new Bank_Account(acct_num);
 	}
-	catch(int i){
+	catch(int i){//if account does not exist
 		cout << "Account does not exist, transfer cancelled." << endl;
 		return;
 	}
-	if(temp->Account_Num == this->Account_Num){
+	if(temp->Account_Num == this->Account_Num){ //trying to transfer into itself
 		cout << "Cannot transfer into current account" << endl;
 	}
 	else {
@@ -395,19 +434,22 @@ void Bank_Account::transfer(long acct_num) {
 		cout << "How much would you like to transfer? Please enter value with no spaces. Cannot be $0.00" << endl;
 		getline(cin, amountStr);
 		sscanf(amountStr.c_str(), "%lf", &amount);
+		//checks for negative amounts
 		if (amount < 0) {
 			cout << "Amount cannot be negative." << endl;
 		}
+		//checks for zero
 		else if(amount == 0){
 			cout << "Amount may not be 0 or an Invalid input. Please enter positive numbers only." << endl;
 		}
+		//checks for larger amount than in account
 		else if (amount > this->balance) {
 			cout << "Insufficient funds for transfer." << endl;
 		}
-		else {
-			*(temp) + amount;
-			this->operator-(amount);
-			temp->print_to_translog(amount, 'T');
+		else { //if amount is valid
+			*(temp) + amount; //adds amount to temp's balance
+			this->operator-(amount); //subtracts amount from current account's balance
+			temp->print_to_translog(amount, 'T'); //update transaction logs
 			this->print_to_translog((amount * -1), 'T');
 			cout << "Amount transferred successfully." << endl;
 		}
@@ -415,7 +457,7 @@ void Bank_Account::transfer(long acct_num) {
 }
 
 
-//derived class from ABC base class
+//derived checking account class from ABC Bank_Account
 class Checking_Acct : public Bank_Account {
 	private:
 		
@@ -434,7 +476,7 @@ Checking_Acct::Checking_Acct(long acct_num) : Bank_Account(acct_num) {
 	//calls base constructor only so far
 }
 
-//derived class
+//derived savings account class from ABC Bank_Account
 class Saving_Acct : public Bank_Account {
 	private:
 		float Interest_Rate;
@@ -450,12 +492,12 @@ class Saving_Acct : public Bank_Account {
 		virtual void transfer(long acct_num);
 };
 
-//sets rate
+//calls base constructor, then gets the interest rate
 Saving_Acct::Saving_Acct(long acct_num) : Bank_Account(acct_num){
 	this->Get_rate();
 }
 
-//sets type to C, sets rate
+//calls base constructor, sets type to S, sets rate
 Saving_Acct::Saving_Acct() : Bank_Account(){
 	Acct_Type = 'S';
 	this->Get_rate();
@@ -469,12 +511,14 @@ void Saving_Acct::deposit() throw(int){
 	cout << "\nHow much would you like to deposit?" << endl;
 	getline(cin,amount);
 	n = atof(amount.c_str());
+	//must be positive
 	if(n <= 0){
 		throw 1;
 	}
+	//add n to balance
 	this->operator+(n);
 	cout << "\nThe new balance of account: " << Account_Num << " is: " << balance << endl;
-	//get new rate
+	//get new rate, update log
 	this->Get_rate();
 	this->print_to_translog(n,'D');
 }
@@ -486,9 +530,11 @@ void Saving_Acct::withdraw() throw(int,char){
 	cout << "\nHow much would you like to withdraw?" << endl;
 	getline(cin,amount);
 	n = atof(amount.c_str());
+	//must be positive
 	if(n <= 0){
 		throw 1;
 	}
+	//must have enough funds to withdraw entered amount
 	if (balance - n >= 0){//if funds are available
 		this->operator-(n);
 		cout << "$" << amount << " withdrawn from account successfully" << endl;
@@ -502,10 +548,11 @@ void Saving_Acct::withdraw() throw(int,char){
 	
 }
 
+//transfer, same as in base class except it also sets the rates for the affected accounts
 void Saving_Acct::transfer(long acct_num){
-	Bank_Account* temp;
+	Saving_Acct* temp;
 	try{
-		temp = new Bank_Account(acct_num);
+		temp = new Saving_Acct(acct_num);
 	}
 	catch(int i){
 		cout << "Account does not exist, transfer cancelled." << endl;
@@ -538,6 +585,7 @@ void Saving_Acct::transfer(long acct_num){
 		}
 	}
 	this->Get_rate();
+	temp->Get_rate();
 }
 
 //print balance
@@ -594,7 +642,8 @@ void Saving_Acct::Calc_Predicted_Interest(){
 	cout << "\nFor how many years would you like to see predicted interest earned on this account? Please neter the number of years:" << endl;
 	getline(cin,t);
 	n = check_num(t);
-	if(n == 0){
+	//years must be positive
+	if(n <= 0){
 		cout << "\nInvalid Input for years. Returning to User Menu." << endl << endl;
 		return;
 	}
@@ -645,6 +694,7 @@ int Manager_Acct::manager_login(long acct_num){
 //freeze an account
 void Manager_Acct::freeze(long Account_Num) {
 	Bank_Account* temp;
+	//make sure account exists
 	try{
 		temp = new Bank_Account(Account_Num);
 	}
@@ -662,6 +712,7 @@ void Manager_Acct::freeze(long Account_Num) {
 //same as freeze's logic, but opposite function. Sets frozen to 0 instead of 1
 void Manager_Acct::unfreeze(long Account_Num) {
 	Bank_Account* temp;
+	//make sure account exists
 	try{
 		temp = new Bank_Account(Account_Num);
 	}
@@ -783,6 +834,7 @@ void Manager_Acct::Adjust_Rate(){
 		cout << "Invalid choice! Returning to menu..." << endl;
 		break;
 	}
+	//write ranfes/rates to file
 	ofstream myfile;
 	myfile.open(filename);
 	for(i=0;i<4;i++){
@@ -1095,7 +1147,7 @@ int main(void){
 				cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
 				getline(cin, in);
 				type_choice = in.at(0);
-				
+				//go to choice
 				switch(type_choice){
 					case 'S':
 					try{
