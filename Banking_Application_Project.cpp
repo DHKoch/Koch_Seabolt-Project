@@ -136,6 +136,7 @@ class Bank_Account {
 		void operator+(double amt);
 		void operator-(double amt);
 		virtual void Calc_Predicted_Interest(){};
+		long get_num();
 };
 
 void Bank_Account::operator+(double amt) {
@@ -150,6 +151,10 @@ void Bank_Account::operator-(double amt) {
 
 char Bank_Account::getAcccountType(){
 	return Acct_Type;
+}
+
+long Bank_Account::get_num(){
+	return Account_Num;
 }
 
 //gets account number, userID, password from user, creates account
@@ -512,7 +517,7 @@ void Saving_Acct::transfer(long acct_num){
 		cout << "Account does not exist, transfer cancelled." << endl;
 		return;
 	}
-	if(temp->Account_Num == this->Account_Num){
+	if(temp->get_num() == this->Account_Num){
 		cout << "Cannot transfer into current account" << endl;
 	}
 	else {
