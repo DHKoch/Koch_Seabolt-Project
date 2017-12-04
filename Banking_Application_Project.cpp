@@ -315,7 +315,7 @@ void Bank_Account::print_translog(){
 
 //checks if account exists
 int Bank_Account::does_exist(){
-	cout << userID << endl;
+	
 	if(userID == 0){
 		//account does not exist
 		return 0;
@@ -611,10 +611,10 @@ void Manager_Acct::freeze(long Account_Num) {
 	try{
 		temp = new Bank_Account(Account_Num);
 	}
-	catch(char q){
-		//empty catch
-	}
 	catch(int r){
+		return;
+	}
+	if(temp->does_exist()==0){
 		return;
 	}
 	temp->frozen = 1;
@@ -628,10 +628,10 @@ void Manager_Acct::unfreeze(long Account_Num) {
 	try{
 		temp = new Bank_Account(Account_Num);
 	}
-	catch(char q){
-		//empty catch
-	}
 	catch(int r){
+		return;
+	}
+	if(temp->does_exist()==0){
 		return;
 	}
 	temp->frozen = 0;
