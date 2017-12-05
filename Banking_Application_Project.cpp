@@ -33,11 +33,11 @@ char user_acct(long acct_num){
 	char filename[30];
 	int n = sprintf(filename,"%08li.txt",acct_num);
 	myfile.open(filename);
-	if(!myfile.is_open()){
+	if(!myfile.is_open()){ //if the file does not exist 
 		return 'F';
 	}
 	else{
-		myfile >> temp;
+		myfile >> temp; //read in account type
 		myfile.close();
 		return temp;
 	}
@@ -46,7 +46,7 @@ char user_acct(long acct_num){
 long check_num(string num){
 	long n = 0;
 	n = atol(num.c_str());
-	if(n<=0){
+	if(n<=0){ //if conversion cannot be done or is less than 0
 		return 0;
 	}
 	else{
@@ -169,7 +169,7 @@ Bank_Account::Bank_Account(){
 	cout << "What 8-digit acccount number would you like to have? Please enter without spaces." << endl;
 	while(i==0){
 		getline(cin,in);
-		Account_Num = check_num(in);
+		Account_Num = check_num(in); //check user input
 		sprintf(filename,"%08li.txt",Account_Num);
 		myfile.open(filename);
 		if(Account_Num > 99999999 || Account_Num == 0){
@@ -908,12 +908,12 @@ int main(void){
 			case 2:
 				cout << "\nWelcome User! Please enter your Account Number, or enter -1 to cancel:" << endl;//attempt to login, need to add password check still
 				getline(cin,in);
-				acct_num = check_num(in);
-				if(acct_num == 0){
+				acct_num = check_num(in); //checks user input and returns the value, returns 0 if not valid
+				if(acct_num == 0){ //case for invalid input
 					cout << "\nAccount number not entered, returning to main menu." << endl << endl;
 					break;
 				}
-				type = user_acct(acct_num);
+				type = user_acct(acct_num); //calls function that returns the type from the file
 				//account is closed
 				if(type == 'F'){
 					cout << "\nThis account number does not exist." << endl;
@@ -923,15 +923,15 @@ int main(void){
 				//savings
 				else if(type == 'S'){
 					try{
-						Account = new Saving_Acct(acct_num);
-						Account->check_password();
+						Account = new Saving_Acct(acct_num); //savings account object created
+						Account->check_password(); //asks user to enter password
 					}
-					catch(int){
+					catch(int){//catch for the throw in the check_password function
 						cout << "\nIncorrect Password for account! Returning to main menu." << endl << endl;
 						break;
 					}
 					
-					if(Account->frozen == 1){
+					if(Account->frozen == 1){ //users cannot log into frozen accounts
 						cout << "\nThis account is frozen. Please speak to a Bank Manager to unfreeze this account." << endl;
 						cout << "\nReturing to main menu" << endl;
 						cout << "------------------------------------------------" << endl << endl;
@@ -941,8 +941,8 @@ int main(void){
 				//checking
 				else if(type == 'C'){
 					try{
-						Account = new Checking_Acct(acct_num);
-						Account->check_password();
+						Account = new Checking_Acct(acct_num); //checking account object created
+						Account->check_password(); //asks user to enter password
 					}
 					catch(int){
 						cout << "\nIncorrect Password for account! Returning to main menu." << endl << endl;
@@ -995,10 +995,10 @@ int main(void){
 						try{
 							Account->withdraw();
 						}
-						catch(int e){
+						catch(int e){ //catch for the throw in withdraw function for invalid user input
 							cout << "\nInvalid value for amount to withdraw from account! Returning to User menu." << endl << endl;
 						}
-						catch(char q){
+						catch(char q){ //catch for the balance being lower than the requested withdraw
 							cout << "\nInsuficient funds for withdraw! Please try again" << endl << endl;
 						}
 						break;
@@ -1006,19 +1006,19 @@ int main(void){
 						case 4:
 							cout << "\nWhat is the account number you would like to transfer to?" << endl;
 							getline(cin, acct_str);
-							acct_num = check_num(acct_str);
+							acct_num = check_num(acct_str); //checks user input, returns the long integer, or 0 if invalid
 							if(acct_num == 0){
 								cout << "\nInvalid input for account number! Returning to User Menu." << endl;
 								break;
 							}
-							Account->transfer(acct_num);
+							Account->transfer(acct_num); 
 						break;
 						//transaction log
 						case 5:
 							try{
 								Account->print_translog();
 							}
-							catch(int){
+							catch(int){ //catch for if not log exists yet
 								cout << "\nReturning to user menu." << endl;
 								cout << "------------------------------------------------" << endl << endl;
 							}
