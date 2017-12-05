@@ -35,8 +35,11 @@ char user_acct(long acct_num){
 	int n = sprintf(filename,"%08li.txt",acct_num);
 	myfile.open(filename);
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if(!myfile.is_open()){ //if the file does not exist 
 =======
+=======
+>>>>>>> 74761adc887988be0c35714cb87afeb506658d4e
 	//file failed to open
 	if(!myfile.is_open()){
 >>>>>>> 74761adc887988be0c35714cb87afeb506658d4e
@@ -45,7 +48,11 @@ char user_acct(long acct_num){
 	//file opened, get account type from file and return it
 	else{
 <<<<<<< HEAD
+<<<<<<< HEAD
 		myfile >> temp; //read in account type
+=======
+		myfile >> type;
+>>>>>>> 74761adc887988be0c35714cb87afeb506658d4e
 =======
 		myfile >> type;
 >>>>>>> 74761adc887988be0c35714cb87afeb506658d4e
@@ -59,7 +66,11 @@ long check_num(string num){
 	long n = 0;
 	n = atol(num.c_str());
 <<<<<<< HEAD
+<<<<<<< HEAD
 	if(n<=0){ //if conversion cannot be done or is less than 0
+=======
+	if(n<=0){ //in case of an invalid number or non-number, use zero as a default value
+>>>>>>> 74761adc887988be0c35714cb87afeb506658d4e
 =======
 	if(n<=0){ //in case of an invalid number or non-number, use zero as a default value
 >>>>>>> 74761adc887988be0c35714cb87afeb506658d4e
