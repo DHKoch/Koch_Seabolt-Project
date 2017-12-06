@@ -114,7 +114,6 @@ string pass_encrypt(string password) {
 	return password;
 }
 
-//ABC
 class Bank_Account {
 	private:
 		
