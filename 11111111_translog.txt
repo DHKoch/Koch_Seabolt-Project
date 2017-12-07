@@ -6,3 +6,5 @@ Transaction Type: Transfer  Amount Transferred: 1  Previous Balance: 13451.5  Ne
 Transaction Type: Transfer  Amount Transferred: -1  Previous Balance: 13452.5  New Balance: 13451.5  
 Transaction Type: Transfer  Amount Transferred: -10000  Previous Balance: 13451.5  New Balance: 3451.5  
 Transaction Type: Deposit  Amount Deposited: 16000.7  Previous Balance: 3451.5  New Balance: 19452.2  
+Transaction Type: Withdraw  Amount Withdrawn: 17000.5  Previous Balance: 19452.2  New Balance: 2451.63  
+Transaction Type: Transfer  Amount Transferred: -100  Previous Balance: 2451.63  New Balance: 2351.63  

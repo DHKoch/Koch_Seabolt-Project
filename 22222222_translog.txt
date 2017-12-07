@@ -6,3 +6,4 @@ Transaction Type: Transfer  Amount Transferred: 100  Previous Balance: 4383.4  N
 Transaction Type: Transfer  Amount Transferred: -100  Previous Balance: 4283.4  New Balance: 4183.4  
 Transaction Type: Transfer  Amount Transferred: 1  Previous Balance: 4183.4  New Balance: 4184.4  
 Transaction Type: Transfer  Amount Transferred: 10000  Previous Balance: 4184.4  New Balance: 14184.4  
+Transaction Type: Transfer  Amount Transferred: 100  Previous Balance: 14184.4  New Balance: 14284.4  

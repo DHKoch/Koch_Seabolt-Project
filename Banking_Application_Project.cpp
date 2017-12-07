@@ -707,15 +707,19 @@ void Manager_Acct::Create_Customer_Acct(){
         in = "";
         cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
         while(k == 0){
+			in = "";
             getline(cin, in);
+			//cout << in.at(0) << endl;
             type = in.at(0);
-            if(type != 'S' || type != 'C'){
+            if(type != 'S' && type != 'C'){
                 cout << "Invalid choiec for account type please try again:" << endl;
             }
-            else{
+            if(type == 'S' || type == 'C'){
                 k = 1;
+				break;
             }
         }
+		//cout << type << endl;
         cout << "Please enter the account number for the new acccount" << endl;
         while(i==0){
 		getline(cin,in);
@@ -782,18 +786,18 @@ void Manager_Acct::Create_Customer_Acct(){
             else if(acct_balance == 0){
                 cout << "This input will set the balance to $0.00. Are you sure you wish to do this?\nEnter 'Y' for yes or 'N' for no." << endl;
                 getline(cin,in);
-		if(strncmp(in.c_str(),"Y",1) == 0){   // strcmp, strncmp
-			acct_balance = 0;
+				if(strncmp(in.c_str(),"Y",1) == 0){   // strcmp, strncmp
+						acct_balance = 0;
                         i = 1;
-		}
-		else if(strncmp(in.c_str(),"N",1) == 0){
-			cout << "balance not set. Please try again:" << endl;
+				}
+				else if(strncmp(in.c_str(),"N",1) == 0){
+					cout << "balance not set. Please try again:" << endl;
 			
-		}
-		else{
-			cout << "Invalid choice! balance not changed. Please try again:" << endl << endl;
+				}
+				else{
+					cout << "Invalid choice! balance not changed. Please try again:" << endl << endl;
 			
-		}
+				}
             }
             else{
                 i = 1;
