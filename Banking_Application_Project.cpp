@@ -661,6 +661,8 @@ class Manager_Acct {
 		int manager_login(long acct_num);
 		void freeze(long Account_Num);
 		void unfreeze(long Account_Num);
+                void Create_Customer_Acct();
+                void Delete_Customer_Acct();
 		void Current_Rates();
 		void Adjust_Rate();
 };
@@ -688,6 +690,165 @@ int Manager_Acct::manager_login(long acct_num){
 		return 0;
 	}
 	return 0;
+}
+
+void Manager_Acct::Create_Customer_Acct(){
+        string in;
+        ifstream myfile;
+	char filename[30];
+	int i = 0;
+        int k = 0;
+        char type;
+        long account_num = 0;
+        double acct_balance = 0;
+        string password;
+        int user_id = 0;
+        cout << "\nPlease enter the account type." << endl;
+        in = "";
+        cout << "Enter 'S' for Savings Account or 'C' for Checking Account:" << endl;
+        while(k == 0){
+            getline(cin, in);
+            type = in.at(0);
+            if(type != 'S' || type != 'C'){
+                cout << "Invalid choiec for account type please try again:" << endl;
+            }
+            else{
+                k = 1;
+            }
+        }
+        cout << "Please enter the account number for the new acccount" << endl;
+        while(i==0){
+		getline(cin,in);
+		account_num = check_num(in);
+		sprintf(filename,"%08li.txt",account_num);
+		//try to open file to see if it already exists
+		myfile.open(filename);
+		//makes sure Account_Num is in acceptable range
+		if(account_num > 99999999 || account_num == 0){
+			cout << "Invalid choice of Account Number! Must be a numbers and 8-digits or less. Please try again:" << endl;
+		}
+		//if file opens, then account already exists
+		else if(myfile.is_open()){
+			cout << "This Account already exists." << endl;
+			throw 1;
+		}
+		//account can be created
+		else{
+			myfile.close();
+			i = 1;//exit loop
+		}
+	}
+	
+        cout << "Enter the password the customer would like to have for this account:" << endl;
+	getline(cin,password);
+	i = 0;
+	while (i == 0) {
+		//if password is empty or all spaces, request a different one
+		string temp = password;
+		temp.erase(remove(temp.begin(), temp.end(), ' '), temp.end());
+		if (temp == "") {
+			cout << "Password cannot be empty. Please enter a valid password." << endl;
+			getline(cin, password);
+		}
+		else {
+			i = 1;
+		}
+	}
+	
+	i = 0;
+	cout << "Enter the userID. Please no spaces." << endl;
+	while(i == 0){
+		//get user id
+		getline(cin,in);
+		user_id = atol(in.c_str());
+		//make sure id is positive
+		if(user_id <= 0){
+			cout << "Invalid choice for User ID, please try again." << endl;
+			cout << "Enter a User ID that is a positive number without spaces. " << endl;
+		}
+		else{
+			i = 1;
+		}
+	}
+	
+        i = 0;
+        cout << "\nEnter the starting balance for this account:" << endl;
+        while (i == 0){
+            getline(cin,in);
+            acct_balance = atof(in.c_str());
+            if(acct_balance < 0){
+                cout << "balance cannot be negative. Please try again:" << endl;
+            }
+            else if(acct_balance == 0){
+                cout << "This input will set the balance to $0.00. Are you sure you wish to do this?\nEnter 'Y' for yes or 'N' for no." << endl;
+                getline(cin,in);
+		if(strncmp(in.c_str(),"Y",1) == 0){   // strcmp, strncmp
+			acct_balance = 0;
+                        i = 1;
+		}
+		else if(strncmp(in.c_str(),"N",1) == 0){
+			cout << "balance not set. Please try again:" << endl;
+			
+		}
+		else{
+			cout << "Invalid choice! balance not changed. Please try again:" << endl << endl;
+			
+		}
+            }
+            else{
+                i = 1;
+            }
+            
+        }
+        
+        ofstream newfile;
+        sprintf(filename,"%08li.txt",account_num);
+        newfile.open(filename,ios::out);
+        newfile << type;
+	newfile << char(13) << char(10);
+	newfile << user_id;
+	newfile << char(13) << char(10);
+	newfile << account_num;
+	newfile << char(13) << char(10);
+	newfile << password;
+	newfile << char(13) << char(10);
+	newfile << acct_balance;
+	newfile << char(13) << char(10);
+	newfile << '0';
+	newfile << char(13) << char(10);
+	newfile.close();
+        cout << "Customer account created!" << endl;
+        
+}
+
+void Manager_Acct::Delete_Customer_Acct(){
+    long num = 0;
+    string in;
+    long account_num = 0;
+    Bank_Account * temp;
+    int i = 0;
+    cout << "Enter the account number for the account to delete" << endl;
+    while (i == 0){
+         getline(cin,in);
+         account_num = atol(in.c_str());
+         if(account_num <= 0 || account_num > 999999999){
+                cout << "Invalid Account Number" << endl;
+                throw 1;
+         }
+         else{
+             i = 1;
+         }
+    }
+    try{
+        temp = new Bank_Account(account_num);
+    }
+    catch(...){
+        cout << "Account does not exist. Returning to manager menu." << endl;
+        throw; //rethrow
+    }
+    temp->close_Acct();
+   
+    
 }
 
 //freeze an account
@@ -792,7 +953,21 @@ void Manager_Acct::Adjust_Rate(){
 			sscanf(in.c_str(), "%d", &choice);
 		}
 	//go to selected range
-	switch(choice){
+	switch(choice){cout << "Enter the password you would like to have for this account:" << endl;
+	getline(cin,password);
+	i = 0;
+	while (i == 0) {
+		//if password is empty or all spaces, request a different one
+		string temp = password;
+		temp.erase(remove(temp.begin(), temp.end(), ' '), temp.end());
+		if (temp == "") {
+			cout << "Password cannot be empty. Please enter a valid password." << endl;
+			getline(cin, password);
+		}
+		else {
+			i = 1;
+		}
+	}
 		case 1:
 			cout << "Enter the new rate as a decimal for accounts with a balance between $4999 - $1000:" << endl;
 			getline(cin,in);
@@ -890,7 +1065,9 @@ int main(void){
 					cout << "2.) Un-Freeze Customer Account" << endl;
 					cout << "3.) View Current Interest Rates" << endl;
 					cout << "4.) Adjust Interest Rates" << endl;
-					cout << "5.) Log Out" << endl;
+                                        cout << "5.) Create Customer Account" << endl;
+                                        cout << "6.) Delete Customer Account" << endl;
+					cout << "7.) Log Out" << endl;
 					choiceStr = ""; //reset values
 					choice = -1;
 					getline(cin,choiceStr);
@@ -935,8 +1112,29 @@ int main(void){
 						case 4:
 						M.Adjust_Rate();
 						break;
+                                                
+                                                case 5:
+                                                    try{
+                                                        M.Create_Customer_Acct();
+                                                    }
+                                                    catch(int i){
+                                                        cout << "Cannot create an account that already exists" << endl;
+                                                    }
+                                                
+                                                break;
+                                                
+                                                case 6:
+                                                    try{
+                                                        M.Delete_Customer_Acct();
+                                                    }
+                                                    catch(...){
+                                                        
+                                                    }
+                                                break;
+                                                
+                                                
 						//exit
-						case 5:
+						case 7:
 						cout << "\nReturning to main menu..." << endl;
 						cout << "------------------------------------------------" << endl << endl;
 						k = 1;
