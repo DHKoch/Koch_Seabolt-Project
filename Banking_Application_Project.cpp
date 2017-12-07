@@ -712,7 +712,7 @@ void Manager_Acct::Create_Customer_Acct(){
 			//cout << in.at(0) << endl;
             type = in.at(0);
             if(type != 'S' && type != 'C'){
-                cout << "Invalid choiec for account type please try again:" << endl;
+                cout << "Invalid choice for account type please try again:" << endl;
             }
             if(type == 'S' || type == 'C'){
                 k = 1;
