@@ -589,7 +589,7 @@ void Saving_Acct::transfer(long acct_num){
 
 //print balance
 void Saving_Acct::check_balance(){
-	cout << "\nYour current balance is: $." << balance << endl;
+	cout << "\nYour current balance is: $" << balance << endl;
 	cout << "The Interest Rate of this account is:" << Interest_Rate*100 << "%." << endl;
 }
 
